@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.sharenestapp.R;
 import com.example.sharenestapp.adapters.ProductAdapter;
 import com.example.sharenestapp.fragments.MyPostsFragment;
+import com.example.sharenestapp.fragments.ProfileFragment;
 import com.example.sharenestapp.models.Product;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -85,6 +86,14 @@ public class HomeActivity extends AppCompatActivity {
             "Khác",
             "Nội thất"
     };
+
+
+
+    // Cá nhân
+    private View homeContent, fragmentContainer;
+    private View navHomeBackground, navProfileBackground;
+    private ImageView iconHome, iconProfile;
+    private TextView textHome, textProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,7 +237,50 @@ public class HomeActivity extends AppCompatActivity {
                             "latestRecycler, categoryRow, searchInput, locationText, " +
                             "emptyText hoặc nearbySubtitle");
         }
+
+
+        // Xử lý button cá nhân
+        homeContent          = findViewById(R.id.homeContent);
+        fragmentContainer    = findViewById(R.id.fragmentContainer);
+        navHomeBackground    = findViewById(R.id.navHomeBackground);
+        navProfileBackground = findViewById(R.id.navProfileBackground);
+        iconHome    = findViewById(R.id.iconHome);
+        iconProfile = findViewById(R.id.iconProfile);
+        textHome    = findViewById(R.id.textHome);
+        textProfile = findViewById(R.id.textProfile);
+
+        findViewById(R.id.navHome).setOnClickListener(v -> showHome());
+        findViewById(R.id.navProfile).setOnClickListener(v -> showProfile());
+
+        showHome();
     }
+
+    private void showHome() {
+        homeContent.setVisibility(View.VISIBLE);
+        fragmentContainer.setVisibility(View.GONE);
+        setTabSelected(navHomeBackground, iconHome, textHome, true);
+        setTabSelected(navProfileBackground, iconProfile, textProfile, false);
+    }
+
+    private void showProfile() {
+        homeContent.setVisibility(View.GONE);
+        fragmentContainer.setVisibility(View.VISIBLE);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new ProfileFragment())
+                .commit();
+        setTabSelected(navHomeBackground, iconHome, textHome, false);
+        setTabSelected(navProfileBackground, iconProfile, textProfile, true);
+    }
+
+    private void setTabSelected(View bg, ImageView icon, TextView label, boolean selected) {
+        int green = ContextCompat.getColor(this, R.color.profile_green);
+        int muted = ContextCompat.getColor(this, R.color.muted);
+        bg.setBackgroundResource(selected ? R.drawable.bg_nav_selected : 0);
+        icon.setColorFilter(selected ? green : muted);
+        label.setTextColor(selected ? green : muted);
+    }
+
+
 
     // Cấu hình danh sách sản phẩm 2 cột
     private void setupRecyclerViews() {
@@ -391,6 +443,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // CÁ NHÂN
         findViewById(R.id.navProfile).setOnClickListener(v -> {
+            showFragment(new ProfileFragment());
             updateSelectedTab("profile");
         });
     }
@@ -865,6 +918,9 @@ public class HomeActivity extends AppCompatActivity {
         if ("requests".equals(tab)) {
             showFragment(new MyPostsFragment());
             updateSelectedTab("requests");
+        } else if ("profile".equals(tab)) {
+            showFragment(new ProfileFragment());
+            updateSelectedTab("profile");
         } else {
             showHomeContent();
             updateSelectedTab("home");
