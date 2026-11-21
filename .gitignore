@@ -19,3 +19,18 @@ captures/
 *.pfx
 .env
 serviceAccountKey.json
+
+# --- .NET Ignore ---
+**/.vs/
+ShareNestAPI/**/bin/
+ShareNestAPI/**/obj/
+*.user
+*.suo
+*.userprefs
+
+# --- Android Ignore ---
+**/build/
+**/.gradle/
+**/.idea/
+**/local.properties
+*.iml
