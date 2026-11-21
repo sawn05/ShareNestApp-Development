@@ -746,7 +746,7 @@ public class HomeActivity extends AppCompatActivity {
 
         return result
                 .replaceAll("\\p{M}+", "")
-                .replace('đ', 'd')
+                .replace("\u0111", "d")
                 .trim();
     }
 
