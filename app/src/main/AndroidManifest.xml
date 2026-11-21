@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:name=".ShareCareApp"
@@ -88,6 +91,33 @@
         <activity
             android:name=".activities.SettingsActivity"
             android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+
+        <!-- ShareNestApp activities -->
+        <activity
+            android:name=".activities.SharenestProductDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+        <activity
+            android:name=".activities.EditProductActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+        <activity
+            android:name=".activities.PublishSuccessActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+        <activity
+            android:name=".activities.AddProductActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+        <activity
+            android:name=".activities.SelectLocationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShareCare.Screen" />
+        <activity
+            android:name=".activities.HomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.ShareCare.Screen" />
     </application>
 
