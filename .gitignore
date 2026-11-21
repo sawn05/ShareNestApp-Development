@@ -9,6 +9,9 @@ captures/
 .cxx/
 .DS_Store
 
+*.png
+*.jpg
+
 # Signing and secrets
 *.jks
 *.keystore
