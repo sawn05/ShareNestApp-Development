@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ShareCare"
 include(":app")
+include(":ShareNestApp:app")
+project(":ShareNestApp:app").projectDir = file("ShareNestApp/app")
