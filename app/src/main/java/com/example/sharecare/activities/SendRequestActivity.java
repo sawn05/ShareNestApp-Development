@@ -12,24 +12,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.models.Product;
 import com.example.sharecare.models.Request;
 import com.example.sharecare.repositories.RequestRepository;
 import com.example.sharecare.utils.DemoStore;
 import com.example.sharecare.utils.ProductImageUi;
 import com.example.sharecare.utils.RequestStatusUi;
+import com.example.sharecare.utils.SystemNotificationHelper;
 import com.example.sharecare.utils.WindowInsetsUi;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import android.app.NotificationManager;
-import android.app.NotificationChannel;
-import android.app.PendingIntent;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import android.os.Build;
-
 import java.util.List;
 
 public class SendRequestActivity extends AppCompatActivity {
@@ -52,6 +46,7 @@ public class SendRequestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_requests);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_HOME);
 
         WindowInsetsUi.addTopPadding(
                 findViewById(android.R.id.content)
@@ -266,8 +261,8 @@ public class SendRequestActivity extends AppCompatActivity {
         repository.sendRequest(productId, message)
                 .addOnSuccessListener(unused -> {
                     showSystemNotification(
-                            "Request sent",
-                            "You just sent a request for " + tvProductName.getText().toString()
+                            "Đã gửi yêu cầu nhận",
+                            "Yêu cầu nhận " + tvProductName.getText().toString() + " đã được gửi."
                     );
                     openSentScreen(
                             tvProductName.getText().toString()
@@ -314,55 +309,7 @@ public class SendRequestActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-    @android.annotation.SuppressLint("MissingPermission")
     private void showSystemNotification(String title, String text) {
-        requestNotificationPermission();
-
-        String channelId = "sharecare_requests";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    "ShareCare",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            channel.enableLights(true);
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 200, 100, 200});
-            getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
-
-        Intent contentIntent = new Intent(this, NotificationActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_notifications)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setWhen(System.currentTimeMillis())
-                .setDefaults(NotificationCompat.DEFAULT_ALL);
-        NotificationManagerCompat.from(this).notify(2001, builder.build());
-    }
-
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-            ) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-                        1001
-                );
-            }
-        }
+        SystemNotificationHelper.show(this, 2001, title, text);
     }
 }

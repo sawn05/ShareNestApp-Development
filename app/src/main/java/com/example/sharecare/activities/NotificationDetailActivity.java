@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.models.Notification;
 import com.example.sharecare.models.Product;
 import com.example.sharecare.utils.DemoStore;
@@ -39,6 +40,7 @@ public class NotificationDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_detail);
+        BottomNavHelper.attach(this, null);
 
         WindowInsetsUi.addTopPadding(
                 findViewById(android.R.id.content)

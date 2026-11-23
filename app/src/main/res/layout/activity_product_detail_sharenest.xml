@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -20,7 +21,7 @@
             android:layout_height="40dp"
             android:padding="9dp"
             android:src="@drawable/back"
-            android:tint="#FFFFFF"
+            app:tint="#FFFFFF"
             android:contentDescription="Quay lại"
             android:clickable="true"
             android:focusable="true"/>
@@ -35,6 +36,7 @@
             android:textSize="19sp"
             android:textStyle="bold"/>
 
+        <include layout="@layout/view_notification_button" />
 
     </LinearLayout>
 
@@ -357,7 +359,7 @@
                     android:layout_height="19dp"
                     android:contentDescription="Lưu vật phẩm"
                     android:src="@drawable/heart"
-                    android:tint="#247B53" />
+                    app:tint="#247B53" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -388,7 +390,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@android:drawable/ic_dialog_alert"
-                    android:tint="#888888"
+                    app:tint="#888888"
                     android:contentDescription="Báo cáo"/>
 
                 <TextView
@@ -401,5 +403,7 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <include layout="@layout/view_bottom_nav" />
 
 </LinearLayout>

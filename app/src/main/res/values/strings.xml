@@ -47,6 +47,7 @@
 
     <string name="nav_home">Trang chủ</string>
     <string name="nav_requests">Yêu cầu</string>
+    <string name="nav_posts">Bài đăng</string>
     <string name="nav_notifications">Thông báo</string>
     <string name="nav_profile">Cá nhân</string>
     <string name="nav_post">Đăng bài</string>

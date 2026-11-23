@@ -32,6 +32,8 @@
             android:text="@string/send_request_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <LinearLayout
@@ -109,4 +111,6 @@
             android:layout_marginTop="10dp"
             android:text="@string/continue_browsing" />
     </LinearLayout>
+
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

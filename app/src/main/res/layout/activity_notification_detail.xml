@@ -32,6 +32,8 @@
             android:text="@string/notification_detail_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -121,4 +123,6 @@
             android:layout_height="54dp"
             android:text="@string/view_request" />
     </LinearLayout>
+
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

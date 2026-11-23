@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.fragments.MyPostsFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,7 +28,7 @@ import java.util.Locale;
 
 public class PublishSuccessActivity extends AppCompatActivity {
 
-    // Pháº£i giá»‘ng collection trong AddProductActivity.
+    // Phải giống collection trong AddProductActivity.
     private static final String COLLECTION = "products";
 
     private ImageView btnBack;
@@ -59,6 +60,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_publish_success);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_POSTS);
 
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -69,7 +71,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
         setupListeners();
 
         if (productId == null || productId.trim().isEmpty()) {
-            showToast("KhÃ´ng tÃ¬m tháº¥y mÃ£ bÃ i Ä‘Äƒng");
+            showToast("Không tìm thấy mã bài đăng");
             goHome();
             return;
         }
@@ -78,7 +80,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
     }
 
     // ===================================
-    // 1. ÃNH Xáº  VIEW
+    // 1. ÁNH XẠ VIEW
     // ===================================
 
     private void initViews() {
@@ -97,12 +99,12 @@ public class PublishSuccessActivity extends AppCompatActivity {
 
         btnViewMyPosts = findViewById(R.id.btnViewMyPosts);
 
-        // Trong XML Ä‘Ã£ Ä‘á»•i Button thÃ nh TextView.
+        // Trong XML đã đổi Button thành TextView.
         btnGoHome = findViewById(R.id.btnGoHome);
     }
 
     // ===================================
-    // 2. Sá»° KIá»†N CÃC NÃšT
+    // 2. SỰ KIỆN CÁC NÚT
     // ===================================
 
     private void setupListeners() {
@@ -118,9 +120,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
                     HomeActivity.class
             );
 
-            startActivity(intent);
-
-            intent.putExtra("openTab", "requests");
+            intent.putExtra("openTab", "posts");
 
             intent.addFlags(
                     Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -150,8 +150,8 @@ public class PublishSuccessActivity extends AppCompatActivity {
 
         btnMore.setOnClickListener(v -> {
             String[] options = {
-                    "Chá»‰nh sá»­a",
-                    "XÃ³a bÃ i Ä‘Äƒng"
+                    "Chỉnh sửa",
+                    "Xóa bài đăng"
             };
 
             new AlertDialog.Builder(this)
@@ -167,7 +167,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
     }
 
     // ===================================
-    // 3. Láº¤Y BÃ€I ÄÄ‚NG Tá»ª FIRESTORE
+    // 3. LẤY BÀI ĐĂNG TỪ FIRESTORE
     // ===================================
 
     private void loadProduct() {
@@ -179,14 +179,14 @@ public class PublishSuccessActivity extends AppCompatActivity {
 
                     if (error != null) {
                         showToast(
-                                "Lá»—i táº£i bÃ i Ä‘Äƒng: "
+                                "Lỗi tải bài đăng: "
                                         + error.getMessage()
                         );
                         return;
                     }
 
                     if (document == null || !document.exists()) {
-                        showToast("BÃ i Ä‘Äƒng khÃ´ng tá»“n táº¡i");
+                        showToast("Bài đăng không tồn tại");
                         goHome();
                         return;
                     }
@@ -195,7 +195,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
                             document.getBoolean("isDeleted");
 
                     if (Boolean.TRUE.equals(isDeleted)) {
-                        showToast("BÃ i Ä‘Äƒng Ä‘Ã£ bá»‹ xÃ³a");
+                        showToast("Bài đăng đã bị xóa");
                         goHome();
                         return;
                     }
@@ -205,7 +205,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
     }
 
     // ===================================
-    // 4. HIá»‚N THá»Š THÃ”NG TIN Váº¬T PHáº¨M
+    // 4. HIỂN THỊ THÔNG TIN VẬT PHẨM
     // ===================================
 
     private void displayProduct(DocumentSnapshot document) {
@@ -213,7 +213,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
         String name = document.getString("name");
         String imageUrl = document.getString("coverImageUrl");
 
-// Náº¿u coverImageUrl trá»‘ng, láº¥y áº£nh Ä‘áº§u tiÃªn trong imageUrls
+// Nếu coverImageUrl trống, lấy ảnh đầu tiên trong imageUrls
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
 
             List<String> imageUrls =
@@ -229,25 +229,25 @@ public class PublishSuccessActivity extends AppCompatActivity {
 
         txtProductName.setText(
                 name == null || name.trim().isEmpty()
-                        ? "Váº­t pháº©m"
+                        ? "Vật phẩm"
                         : name
         );
 
-        // Tráº¡ng thÃ¡i bÃ i Ä‘Äƒng.
+        // Trạng thái bài đăng.
         if ("AVAILABLE".equals(status)) {
-            txtProductStatus.setText("â— CÃ²n kháº£ dá»¥ng");
+            txtProductStatus.setText("● Còn khả dụng");
 
         } else if ("RESERVED".equals(status)) {
-            txtProductStatus.setText("â— ÄÃ£ cÃ³ ngÆ°á»i nháº­n");
+            txtProductStatus.setText("● Đã có người nhận");
 
         } else if ("COMPLETED".equals(status)) {
-            txtProductStatus.setText("â— ÄÃ£ hoÃ n táº¥t");
+            txtProductStatus.setText("● Đã hoàn tất");
 
         } else {
-            txtProductStatus.setText("â— KhÃ´ng xÃ¡c Ä‘á»‹nh");
+            txtProductStatus.setText("● Không xác định");
         }
 
-        // Hiá»ƒn thá»‹ áº£nh tá»« Firebase.
+        // Hiển thị ảnh từ Firebase.
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
 
             Glide.with(this)
@@ -277,16 +277,16 @@ public class PublishSuccessActivity extends AppCompatActivity {
             );
 
             txtCreatedAt.setText(
-                    "ÄÄƒng lÃºc " + format.format(createdAt)
+                    "Đăng lúc " + format.format(createdAt)
             );
 
         } else {
 
-            txtCreatedAt.setText("Vá»«a Ä‘Äƒng");
+            txtCreatedAt.setText("Vừa đăng");
         }
 
 
-        // Sá»‘ lÆ°á»£t yÃªu cáº§u nháº­n.
+        // Số lượt yêu cầu nhận.
         Long requestCount = document.getLong("requestCount");
 
         if (requestCount == null) {
@@ -294,12 +294,12 @@ public class PublishSuccessActivity extends AppCompatActivity {
         }
 
         txtRequestCount.setText(
-                requestCount + " yÃªu cáº§u nháº­n"
+                requestCount + " yêu cầu nhận"
         );
     }
 
     // ===================================
-    // 5. DIALOG XÃC NHáº¬N XÃ“A
+    // 5. DIALOG XÁC NHẬN XÓA
     // ===================================
 
     private void showDeleteDialog() {
@@ -307,23 +307,23 @@ public class PublishSuccessActivity extends AppCompatActivity {
         if (isDeleting) return;
 
         new AlertDialog.Builder(this)
-                .setTitle("XÃ¡c nháº­n xÃ³a bÃ i Ä‘Äƒng")
+                .setTitle("Xác nhận xóa bài đăng")
                 .setMessage(
-                        "Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a váº­t pháº©m nÃ y?\n\n"
-                                + "Sau khi xÃ³a, bÃ i Ä‘Äƒng sáº½ khÃ´ng cÃ²n "
-                                + "hiá»ƒn thá»‹ trÃªn trang chá»§."
+                        "Bạn có chắc chắn muốn xóa vật phẩm này?\n\n"
+                                + "Sau khi xóa, bài đăng sẽ không còn "
+                                + "hiển thị trên trang chủ."
                 )
-                .setNegativeButton("Há»§y", (dialog, which) ->
+                .setNegativeButton("Hủy", (dialog, which) ->
                         dialog.dismiss()
                 )
-                .setPositiveButton("XÃ³a bÃ i", (dialog, which) ->
+                .setPositiveButton("Xóa bài", (dialog, which) ->
                         deleteProduct()
                 )
                 .show();
     }
 
     // ===================================
-    // 6. XÃ“A Má»€M BÃ€I ÄÄ‚NG
+    // 6. XÓA MỀM BÀI ĐĂNG
     // ===================================
 
     private void deleteProduct() {
@@ -331,7 +331,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
         if (isDeleting) return;
 
         if (auth.getCurrentUser() == null) {
-            showToast("Báº¡n cáº§n Ä‘Äƒng nháº­p");
+            showToast("Bạn cần đăng nhập");
             return;
         }
 
@@ -341,7 +341,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
         if (productOwnerId == null
                 || !currentUid.equals(productOwnerId)) {
 
-            showToast("Báº¡n khÃ´ng cÃ³ quyá»n xÃ³a bÃ i nÃ y");
+            showToast("Bạn không có quyền xóa bài này");
             return;
         }
 
@@ -356,7 +356,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
                 )
                 .addOnSuccessListener(unused -> {
 
-                    showToast("ÄÃ£ xÃ³a bÃ i Ä‘Äƒng thÃ nh cÃ´ng");
+                    showToast("Đã xóa bài đăng thành công");
 
                     goHome();
                 })
@@ -366,13 +366,13 @@ public class PublishSuccessActivity extends AppCompatActivity {
                     btnDeleteProduct.setEnabled(true);
 
                     showToast(
-                            "XÃ³a bÃ i tháº¥t báº¡i: " + e.getMessage()
+                            "Xóa bài thất bại: " + e.getMessage()
                     );
                 });
     }
 
     // ===================================
-    // 7. Vá»€ TRANG CHá»¦
+    // 7. VỀ TRANG CHỦ
     // ===================================
 
     private void goHome() {
@@ -392,7 +392,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
     }
 
     // ===================================
-    // 8. THÃ”NG BÃO
+    // 8. THÔNG BÁO
     // ===================================
 
     private void showToast(String message) {
@@ -405,7 +405,7 @@ public class PublishSuccessActivity extends AppCompatActivity {
     }
 
     // ===================================
-    // 9. Há»¦Y LISTENER KHI THOÃT
+    // 9. HỦY LISTENER KHI THOÁT
     // ===================================
 
     @Override

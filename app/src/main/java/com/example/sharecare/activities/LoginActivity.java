@@ -42,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (success) {
                     AuthSession.saveSession(LoginActivity.this, email);
-                    startActivity(new Intent(LoginActivity.this, ProductListActivity.class));
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                     finish();
                 } else {
                     Toast.makeText(LoginActivity.this, "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show();

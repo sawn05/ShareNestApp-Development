@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -18,7 +19,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/back"
-            android:tint="#FFFFFF"
+            app:tint="#FFFFFF"
             android:contentDescription="Quay lại" />
 
         <TextView
@@ -29,6 +30,8 @@
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="21sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <!-- Ô tìm kiếm địa chỉ -->
@@ -46,7 +49,7 @@
             android:layout_height="24dp"
             android:src="@drawable/search_icon"
             android:contentDescription="Tìm kiếm"
-            android:tint="#777777" />
+            app:tint="#777777" />
 
         <EditText
             android:id="@+id/edtSearchLocation"
@@ -158,4 +161,6 @@
             android:backgroundTint="#21845A" />
 
     </LinearLayout>
+
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

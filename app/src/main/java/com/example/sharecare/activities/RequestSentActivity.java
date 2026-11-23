@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.utils.WindowInsetsUi;
 
 public class RequestSentActivity extends AppCompatActivity {
@@ -15,6 +16,7 @@ public class RequestSentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_sent);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_REQUESTS);
 
         WindowInsetsUi.addTopPadding(
                 findViewById(android.R.id.content)
@@ -53,7 +55,7 @@ public class RequestSentActivity extends AppCompatActivity {
         findViewById(R.id.btnContinueBrowsing).setOnClickListener(v -> {
             Intent intent = new Intent(
                     this,
-                    ProductListActivity.class
+                    HomeActivity.class
             );
             intent.addFlags(
                     Intent.FLAG_ACTIVITY_CLEAR_TOP

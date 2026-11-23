@@ -96,7 +96,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                     Toast.makeText(RegisterActivity.this,
                                                             "Đăng ký thành công",
                                                             Toast.LENGTH_SHORT).show();
-                                                    startActivity(new Intent(RegisterActivity.this, ProductListActivity.class));
+                                                    startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
                                                     finish();
                                                 })
                                                 .addOnFailureListener(e -> {

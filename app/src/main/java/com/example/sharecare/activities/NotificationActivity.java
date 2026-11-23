@@ -14,7 +14,7 @@ import com.example.sharecare.utils.DemoStore;
 import com.example.sharecare.utils.WindowInsetsUi;
 import com.example.sharecare.adapters.NotificationAdapter;
 import com.example.sharecare.models.Notification;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,7 +26,6 @@ import java.util.List;
 public class NotificationActivity extends AppCompatActivity {
 
     private RecyclerView rvNotifications;
-    private BottomNavigationView bottomNav;
 
     private List<Notification> notificationList;
 
@@ -53,7 +52,6 @@ public class NotificationActivity extends AppCompatActivity {
 
         rvNotifications = findViewById(R.id.rvNotifications);
         layoutEmpty = findViewById(R.id.layoutEmpty);
-        bottomNav = findViewById(R.id.bottomNav);
 
         findViewById(R.id.btnBack).setOnClickListener(v ->
                 getOnBackPressedDispatcher().onBackPressed()
@@ -77,7 +75,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         rvNotifications.setAdapter(adapter);
 
-        setUpBottomNavigation();
+        BottomNavHelper.attach(this, null);
 
         if (demoMode) {
             loadDemoNotifications();
@@ -91,63 +89,6 @@ public class NotificationActivity extends AppCompatActivity {
         listenNotifications();
     }
 
-    private void setUpBottomNavigation() {
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-
-        bottomNav.setSelectedItemId(R.id.nav_notifications);
-
-        bottomNav.setOnItemSelectedListener(item -> {
-
-            if (item.getItemId() == R.id.nav_home) {
-                Intent intent = new Intent(
-                        this,
-                        ProductListActivity.class
-                );
-                intent.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                );
-                startActivity(intent);
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_requests) {
-                Intent intent = new Intent(
-                        this,
-                        MyRequestsActivity.class
-                );
-                intent.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                );
-                startActivity(intent);
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_post) {
-                Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_notifications) {
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_profile) {
-                startActivity(new Intent(
-                        this,
-                        SettingsActivity.class
-                ));
-                return false;
-            }
-
-            return false;
-        });
-
-        updateNotificationBadge();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -155,34 +96,6 @@ public class NotificationActivity extends AppCompatActivity {
         if (demoMode) {
             loadDemoNotifications();
         }
-        updateNotificationBadge();
-    }
-
-    private void updateNotificationBadge() {
-        if (bottomNav == null) {
-            return;
-        }
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            bottomNav.removeBadge(R.id.nav_notifications);
-            return;
-        }
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance()
-                .collection("notifications")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("isRead", false)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    int count = snapshot.size();
-                    if (count > 0) {
-                        com.google.android.material.badge.BadgeDrawable badge =
-                                bottomNav.getOrCreateBadge(R.id.nav_notifications);
-                        badge.setNumber(count);
-                        badge.setVisible(true);
-                    } else {
-                        bottomNav.removeBadge(R.id.nav_notifications);
-                    }
-                });
     }
 
     private void loadDemoNotifications() {
@@ -208,18 +121,15 @@ public class NotificationActivity extends AppCompatActivity {
                 .addSnapshotListener((snapshots, error) -> {
 
                     if (error != null) {
-                        demoMode = true;
-
                         if (listenerRegistration != null) {
                             listenerRegistration.remove();
                         }
 
                         Toast.makeText(this,
-                                "Không truy cập được Firestore, "
-                                        + "đang dùng dữ liệu mẫu.",
+                                "Không truy cập được Firestore.",
                                 Toast.LENGTH_SHORT).show();
 
-                        loadDemoNotifications();
+                        layoutEmpty.setVisibility(View.VISIBLE);
                         return;
                     }
 
@@ -279,8 +189,8 @@ public class NotificationActivity extends AppCompatActivity {
                             )
                     );
 
+                    demoMode = false;
                     adapter.notifyDataSetChanged();
-
                     layoutEmpty.setVisibility(
                             notificationList.isEmpty()
                                     ? View.VISIBLE

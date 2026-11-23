@@ -32,6 +32,8 @@
             android:text="@string/notifications_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <FrameLayout
@@ -85,14 +87,5 @@
         </LinearLayout>
     </FrameLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/surface"
-        android:elevation="8dp"
-        app:itemIconTint="@color/nav_item_color"
-        app:itemTextColor="@color/nav_item_color"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_bottom_nav" />
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

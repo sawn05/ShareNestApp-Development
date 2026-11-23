@@ -14,7 +14,7 @@ import com.example.sharecare.utils.DemoStore;
 import com.example.sharecare.utils.WindowInsetsUi;
 import com.example.sharecare.adapters.RequestAdapter;
 import com.example.sharecare.models.Request;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,7 +29,6 @@ public class MyRequestsActivity extends AppCompatActivity {
     private RecyclerView rvRequests;
     private TabLayout tabStatus;
     private View layoutEmpty;
-    private BottomNavigationView bottomNav;
 
     private List<Request> requests;
     private List<Request> filteredRequests;
@@ -52,7 +51,6 @@ public class MyRequestsActivity extends AppCompatActivity {
         rvRequests = findViewById(R.id.rvRequests);
         tabStatus = findViewById(R.id.tabStatus);
         layoutEmpty = findViewById(R.id.layoutEmpty);
-        bottomNav = findViewById(R.id.bottomNav);
 
         requests = new ArrayList<>();
         filteredRequests = new ArrayList<>();
@@ -76,7 +74,7 @@ public class MyRequestsActivity extends AppCompatActivity {
         demoMode = FirebaseAuth.getInstance().getCurrentUser()
                 == null;
 
-        setUpBottomNavigation();
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_REQUESTS);
 
         adapter = new RequestAdapter(
                 filteredRequests,
@@ -123,81 +121,6 @@ public class MyRequestsActivity extends AppCompatActivity {
         );
 
         loadRequests();
-    }
-
-    private void setUpBottomNavigation() {
-
-        bottomNav = findViewById(R.id.bottomNav);
-
-        bottomNav.setSelectedItemId(R.id.nav_requests);
-
-        bottomNav.setOnItemSelectedListener(item -> {
-
-            if (item.getItemId() == R.id.nav_home) {
-                Intent intent = new Intent(
-                        this,
-                        ProductListActivity.class
-                );
-                intent.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                );
-                startActivity(intent);
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_post) {
-                Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_notifications) {
-                startActivity(new Intent(
-                        this,
-                        NotificationActivity.class
-                ));
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_profile) {
-                startActivity(new Intent(
-                        this,
-                        SettingsActivity.class
-                ));
-                return false;
-            }
-
-            return item.getItemId() == R.id.nav_requests;
-        });
-
-        updateNotificationBadge();
-    }
-
-    private void updateNotificationBadge() {
-        if (bottomNav == null) {
-            return;
-        }
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            bottomNav.removeBadge(R.id.nav_notifications);
-            return;
-        }
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance()
-                .collection("notifications")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("isRead", false)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    int count = snapshot.size();
-                    if (count > 0) {
-                        com.google.android.material.badge.BadgeDrawable badge =
-                                bottomNav.getOrCreateBadge(R.id.nav_notifications);
-                        badge.setNumber(count);
-                        badge.setVisible(true);
-                    } else {
-                        bottomNav.removeBadge(R.id.nav_notifications);
-                    }
-                });
     }
 
     @Override

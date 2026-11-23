@@ -9,19 +9,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.sharecare.R;
 import com.example.sharecare.utils.AuthSession;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private TextView tvAccountEmail;
     private TextView tvAccountUid;
-    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +29,6 @@ public class SettingsActivity extends AppCompatActivity {
         tvAccountEmail = findViewById(R.id.tvAccountEmail);
         tvAccountUid = findViewById(R.id.tvAccountUid);
         Button btnLogout = findViewById(R.id.btnLogout);
-        bottomNav = findViewById(R.id.bottomNav);
 
         btnBack.setOnClickListener(v -> onBackPressed());
 
@@ -46,41 +42,7 @@ public class SettingsActivity extends AppCompatActivity {
                 : "";
         tvAccountUid.setText("UID: " + uid);
 
-        bottomNav.setSelectedItemId(R.id.nav_profile);
-
-        updateNotificationBadge();
-
-        bottomNav.setOnItemSelectedListener(item -> {
-
-            if (item.getItemId() == R.id.nav_home) {
-                startActivity(new Intent(this, ProductListActivity.class));
-                finish();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_requests) {
-                startActivity(new Intent(this, MyRequestsActivity.class));
-                finish();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_post) {
-                Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_notifications) {
-                startActivity(new Intent(this, NotificationActivity.class));
-                finish();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_profile) {
-                return false;
-            }
-
-            return false;
-        });
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_PROFILE);
 
         btnLogout.setOnClickListener(v -> {
             AuthSession.clearSession(SettingsActivity.this);
@@ -93,36 +55,4 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateNotificationBadge();
-    }
-
-    private void updateNotificationBadge() {
-        if (bottomNav == null) {
-            return;
-        }
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            bottomNav.removeBadge(R.id.nav_notifications);
-            return;
-        }
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance()
-                .collection("notifications")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("isRead", false)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    int count = snapshot.size();
-                    if (count > 0) {
-                        com.google.android.material.badge.BadgeDrawable badge =
-                                bottomNav.getOrCreateBadge(R.id.nav_notifications);
-                        badge.setNumber(count);
-                        badge.setVisible(true);
-                    } else {
-                        bottomNav.removeBadge(R.id.nav_notifications);
-                    }
-                });
-    }
 }

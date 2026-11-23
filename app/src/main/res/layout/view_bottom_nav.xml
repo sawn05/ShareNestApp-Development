@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomNav"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="#FFFFFF"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:elevation="5dp">
+
+    <LinearLayout
+        android:id="@+id/navHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/navHomeBackground"
+            android:layout_width="54dp"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/iconHome"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/home"
+                android:contentDescription="@string/nav_home" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_home"
+            android:textSize="10sp"
+            android:textColor="@color/muted"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navRequests"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/navRequestsTabBackground"
+            android:layout_width="54dp"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/iconRequestsTab"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_inbox"
+                android:contentDescription="@string/nav_requests" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textRequestsTab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_requests"
+            android:textSize="10sp"
+            android:textColor="@color/muted"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navAdd"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/btnAddProduct"
+            android:layout_width="40dp"
+            android:layout_height="35dp"
+            android:background="@drawable/bg_nav_add">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center"
+                android:src="@drawable/add"
+                android:contentDescription="@string/nav_post"
+                android:scaleType="fitCenter"
+                app:tint="#FFFFFF" />
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/nav_post"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="@color/green"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navPosts"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/navPostsBackground"
+            android:layout_width="54dp"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/iconPosts"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_list"
+                android:contentDescription="@string/nav_posts" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textPosts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_posts"
+            android:textSize="10sp"
+            android:textColor="@color/muted"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navProfile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/navProfileBackground"
+            android:layout_width="54dp"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/iconProfile"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/user"
+                android:contentDescription="@string/nav_profile" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="@string/nav_profile"
+            android:textSize="10sp"
+            android:textColor="@color/muted"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,31 +1,22 @@
 package com.example.sharecare.activities;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.utils.DemoStore;
+import com.example.sharecare.utils.SystemNotificationHelper;
 import com.example.sharecare.utils.WindowInsetsUi;
 import com.example.sharecare.adapters.RequestAdapter;
 import com.example.sharecare.models.Request;
 import com.example.sharecare.repositories.RequestRepository;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,6 +52,8 @@ public class ReceivedRequestsActivity extends AppCompatActivity {
             WindowInsetsUi.addTopPadding(
                     findViewById(android.R.id.content)
             );
+
+            BottomNavHelper.attach(this, BottomNavHelper.TAB_REQUESTS);
 
         rvRequests = findViewById(R.id.rvReceivedRequests);
         tabStatus = findViewById(R.id.tabStatus);
@@ -322,56 +315,8 @@ public class ReceivedRequestsActivity extends AppCompatActivity {
                 .show();
     }
 
-    @android.annotation.SuppressLint("MissingPermission")
     private void showSystemNotification(String title, String text) {
-        requestNotificationPermission();
-
-        String channelId = "sharecare_requests";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    "ShareCare",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            channel.enableLights(true);
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 200, 100, 200});
-            getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
-
-        Intent contentIntent = new Intent(this, NotificationActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_notifications)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setWhen(System.currentTimeMillis())
-                .setDefaults(NotificationCompat.DEFAULT_ALL);
-        NotificationManagerCompat.from(this).notify(2002, builder.build());
-    }
-
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-            ) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-                        1001
-                );
-            }
-        }
+        SystemNotificationHelper.show(this, 2002, title, text);
     }
 
     private void openDetail(Request request) {

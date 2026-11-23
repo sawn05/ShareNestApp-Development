@@ -21,12 +21,11 @@ import com.example.sharecare.R;
 import com.example.sharecare.adapters.ProductAdapter;
 import com.example.sharecare.models.Product;
 import com.example.sharecare.utils.AuthSession;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.utils.DemoStore;
 import com.example.sharecare.utils.WindowInsetsUi;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -42,7 +41,6 @@ public class ProductListActivity extends AppCompatActivity {
     private View layoutEmpty;
     private RecyclerView rvProducts;
     private ChipGroup chipCategories;
-    private BottomNavigationView bottomNav;
     private LinearLayout layoutShakeBanner;
     private TextView tvShakeBanner;
     private Button btnRefreshManual;
@@ -200,62 +198,9 @@ public class ProductListActivity extends AppCompatActivity {
             filterLauncher.launch(intent);
         });
 
-        setUpBottomNavigation();
-
-        updateNotificationBadge();
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_HOME);
 
         loadFirestoreProducts();
-    }
-
-    private void setUpBottomNavigation() {
-
-        bottomNav = findViewById(R.id.bottomNav);
-
-        bottomNav.setSelectedItemId(R.id.nav_home);
-
-        bottomNav.setOnItemSelectedListener(item -> {
-
-            if (item.getItemId() == R.id.nav_home) {
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_requests) {
-                startActivity(new Intent(
-                        this,
-                        MyRequestsActivity.class
-                ));
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_post) {
-                Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_notifications) {
-                startActivity(new Intent(
-                        this,
-                        NotificationActivity.class
-                ));
-                return false;
-            }
-
-            if (item.getItemId() == R.id.nav_profile) {
-                startActivity(new Intent(
-                        this,
-                        SettingsActivity.class
-                ));
-                return false;
-            }
-
-            return false;
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateNotificationBadge();
     }
 
     private void loadFirestoreProducts() {
@@ -507,30 +452,4 @@ public class ProductListActivity extends AppCompatActivity {
         syncingCategoryChips = false;
     }
 
-    private void updateNotificationBadge() {
-        if (bottomNav == null) {
-            return;
-        }
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            bottomNav.removeBadge(R.id.nav_notifications);
-            return;
-        }
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance()
-                .collection("notifications")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("isRead", false)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    int count = snapshot.size();
-                    if (count > 0) {
-                        com.google.android.material.badge.BadgeDrawable badge =
-                                bottomNav.getOrCreateBadge(R.id.nav_notifications);
-                        badge.setNumber(count);
-                        badge.setVisible(true);
-                    } else {
-                        bottomNav.removeBadge(R.id.nav_notifications);
-                    }
-                });
-    }
 }

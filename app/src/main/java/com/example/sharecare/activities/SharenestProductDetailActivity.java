@@ -18,18 +18,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.sharecare.R;
+import com.example.sharecare.repositories.RequestRepository;
+import com.example.sharecare.utils.BottomNavHelper;
+import com.example.sharecare.utils.SystemNotificationHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SharenestProductDetailActivity extends AppCompatActivity {
     private FirebaseFirestore db;
@@ -57,6 +56,7 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail_sharenest);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_HOME);
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         productId = getIntent().getStringExtra("productId");
@@ -69,7 +69,7 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
         btnFavorite.setOnClickListener(v -> toggleFavorite());
         btnReport.setOnClickListener(v -> reportProduct());
         if (productId == null || productId.trim().isEmpty()) {
-            toast("Thiáº¿u mÃ£ váº­t pháº©m (productId)");
+            toast("Thiếu mã vật phẩm (productId)");
             finish();
             return;
         }
@@ -101,11 +101,11 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
         productListener = db.collection("products").document(productId)
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null) {
-                        toast("KhÃ´ng táº£i Ä‘Æ°á»£c váº­t pháº©m: " + error.getMessage());
+                        toast("Không tải được vật phẩm: " + error.getMessage());
                         return;
                     }
                     if (snapshot == null || !snapshot.exists()) {
-                        toast("Váº­t pháº©m khÃ´ng cÃ²n tá»“n táº¡i");
+                        toast("Vật phẩm không còn tồn tại");
                         finish();
                         return;
                     }
@@ -121,24 +121,24 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
         Long total = doc.getLong("quantity");
         quantityAvailable = available != null ? available : (total != null ? total : 0);
 
-        txtProductName.setText(orDefault(str(doc, "name"), "Váº­t pháº©m"));
-        txtProductDescription.setText(orDefault(str(doc, "description"), "ChÆ°a cÃ³ mÃ´ táº£"));
-        txtCategory.setText(orDefault(str(doc, "category"), "ChÆ°a rÃµ"));
-        txtQuantity.setText(quantityAvailable + " cÃ²n láº¡i");
+        txtProductName.setText(orDefault(str(doc, "name"), "Vật phẩm"));
+        txtProductDescription.setText(orDefault(str(doc, "description"), "Chưa có mô tả"));
+        txtCategory.setText(orDefault(str(doc, "category"), "Chưa rõ"));
+        txtQuantity.setText(quantityAvailable + " còn lại");
         txtCondition.setText(conditionLabel(str(doc, "condition")));
-        String address = orDefault(str(doc, "address"), "ChÆ°a cÃ³ Ä‘á»‹a chá»‰");
+        String address = orDefault(str(doc, "address"), "Chưa có địa chỉ");
         txtProductLocation.setText(address);
         txtArea.setText(address);
 
         boolean availableNow = !isDeleted && "AVAILABLE".equalsIgnoreCase(status)
                 && quantityAvailable > 0;
-        txtProductStatus.setText(availableNow ? "â— CÃ²n kháº£ dá»¥ng" : "â— KhÃ´ng kháº£ dá»¥ng");
+        txtProductStatus.setText(availableNow ? "● Còn khả dụng" : "● Không khả dụng");
         txtProductStatus.setTextColor(Color.parseColor(availableNow ? "#247B53" : "#9B4A3D"));
         FirebaseUser user = auth.getCurrentUser();
         boolean ownProduct = user != null && user.getUid().equals(ownerId);
         btnRequest.setEnabled(availableNow && !ownProduct && !requestInProgress);
-        btnRequest.setText(ownProduct ? "ÄÃ¢y lÃ  váº­t pháº©m cá»§a báº¡n"
-                : (availableNow ? "Gá»­i yÃªu cáº§u nháº­n" : "Hiá»‡n khÃ´ng thá»ƒ yÃªu cáº§u"));
+        btnRequest.setText(ownProduct ? "Đây là vật phẩm của bạn"
+                : (availableNow ? "Gửi yêu cầu nhận" : "Hiện không thể yêu cầu"));
 
         imageUrls.clear();
         Object raw = doc.get("imageUrls");
@@ -192,7 +192,7 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
 
     private void loadOwner() {
         if (ownerId.isEmpty()) {
-            txtOwnerName.setText("KhÃ´ng rÃµ ngÆ°á»i chia sáº»");
+            txtOwnerName.setText("Không rõ người chia sẻ");
             txtOwnerAvatar.setText("?");
             return;
         }
@@ -201,12 +201,12 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc -> {
                     if (!expectedOwner.equals(ownerId)) return;
                     String name = orDefault(str(doc, "full_name"), str(doc, "fullName"));
-                    name = orDefault(name, "NgÆ°á»i chia sáº»");
+                    name = orDefault(name, "Người chia sẻ");
                     txtOwnerName.setText(name);
                     txtOwnerAvatar.setText(initials(name));
                 })
                 .addOnFailureListener(e -> {
-                    txtOwnerName.setText("NgÆ°á»i chia sáº»");
+                    txtOwnerName.setText("Người chia sẻ");
                     txtOwnerAvatar.setText("?");
                 });
     }
@@ -214,79 +214,66 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
     private void confirmRequest() {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null || user.isAnonymous()) {
-            toast("Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ gá»­i yÃªu cáº§u");
+            toast("Vui lòng đăng nhập để gửi yêu cầu");
             return;
         }
         if (user.getUid().equals(ownerId)) {
-            toast("Báº¡n khÃ´ng thá»ƒ yÃªu cáº§u váº­t pháº©m cá»§a chÃ­nh mÃ¬nh");
+            toast("Bạn không thể yêu cầu vật phẩm của chính mình");
             return;
         }
         if (requestInProgress || quantityAvailable <= 0 || isDeleted || !"AVAILABLE".equals(status)) {
-            toast("Váº­t pháº©m hiá»‡n khÃ´ng kháº£ dá»¥ng");
+            toast("Vật phẩm hiện không khả dụng");
             return;
         }
         new AlertDialog.Builder(this)
-                .setTitle("Gá»­i yÃªu cáº§u nháº­n")
-                .setMessage("Báº¡n muá»‘n gá»­i yÃªu cáº§u nháº­n 1 váº­t pháº©m? NgÆ°á»i chia sáº» sáº½ xem vÃ  pháº£n há»“i yÃªu cáº§u.")
-                .setNegativeButton("Há»§y", null)
-                .setPositiveButton("Gá»­i yÃªu cáº§u", (dialog, which) -> sendRequest(user.getUid()))
+                .setTitle("Gửi yêu cầu nhận")
+                .setMessage("Bạn muốn gửi yêu cầu nhận 1 vật phẩm? Người chia sẻ sẽ xem và phản hồi yêu cầu.")
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Gửi yêu cầu", (dialog, which) -> sendRequest())
                 .show();
     }
 
-    private void sendRequest(String requesterId) {
+    private void sendRequest() {
         requestInProgress = true;
         btnRequest.setEnabled(false);
-        db.runTransaction((Transaction.Function<Void>) transaction -> {
-            com.google.firebase.firestore.DocumentReference productRef =
-                    db.collection("products").document(productId);
-            DocumentSnapshot SharenestProduct = transaction.get(productRef);
-            if (!SharenestProduct.exists() || Boolean.TRUE.equals(SharenestProduct.getBoolean("isDeleted"))
-                    || !"AVAILABLE".equals(SharenestProduct.getString("status"))) {
-                throw new IllegalStateException("Váº­t pháº©m khÃ´ng kháº£ dá»¥ng");
-            }
-            Long remaining = SharenestProduct.getLong("quantityAvailable");
-            if (remaining == null || remaining <= 0) {
-                throw new IllegalStateException("Váº­t pháº©m Ä‘Ã£ háº¿t sá»‘ lÆ°á»£ng");
-            }
-            if (requesterId.equals(SharenestProduct.getString("ownerId"))) {
-                throw new IllegalStateException("KhÃ´ng thá»ƒ yÃªu cáº§u váº­t pháº©m cá»§a mÃ¬nh");
-            }
-            // PENDING khÃ´ng trá»« sá»‘ lÆ°á»£ng ngay; chá»‰ trá»« khi chá»§ bÃ i Ä‘Äƒng duyá»‡t.
-            com.google.firebase.firestore.DocumentReference reservationRef =
-                    db.collection("reservations").document();
-            Map<String, Object> request = new HashMap<>();
-            request.put("post_id", productId);
-            request.put("requester_id", requesterId);
-            request.put("quantity_reserved", 1);
-            request.put("status", "PENDING");
-            request.put("created_at", FieldValue.serverTimestamp());
-            request.put("updated_at", FieldValue.serverTimestamp());
-            transaction.set(reservationRef, request);
-            return null;
-        }).addOnSuccessListener(unused -> {
-            requestInProgress = false;
-            toast("ÄÃ£ gá»­i yÃªu cáº§u nháº­n váº­t pháº©m");
-            btnRequest.setEnabled(false);
-            btnRequest.setText("ÄÃ£ gá»­i yÃªu cáº§u");
-        }).addOnFailureListener(e -> {
-            requestInProgress = false;
-            btnRequest.setEnabled(true);
-            toast("KhÃ´ng gá»­i Ä‘Æ°á»£c yÃªu cáº§u: " + e.getMessage());
-        });
+        new RequestRepository().sendRequest(productId, "Yêu cầu nhận vật phẩm")
+                .addOnSuccessListener(unused -> {
+                    requestInProgress = false;
+                    toast("Đã gửi yêu cầu nhận vật phẩm");
+                    String productName = txtProductName.getText().toString().trim();
+                    if (productName.isEmpty()) {
+                        productName = "vật phẩm";
+                    }
+                    SystemNotificationHelper.show(
+                            this,
+                            2001,
+                            "Đã gửi yêu cầu nhận",
+                            "Yêu cầu nhận " + productName + " đã được gửi."
+                    );
+                    Intent intent = new Intent(this, MyRequestsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    requestInProgress = false;
+                    btnRequest.setEnabled(true);
+                    toast("Không gửi được yêu cầu: " + e.getMessage());
+                });
     }
 
     private void toggleFavorite() {
-        // ChÆ°a cÃ³ cáº¥u trÃºc favorites trong Firestore; khÃ´ng hiá»ƒn thá»‹ thÃ nh cÃ´ng giáº£.
-        toast("Chá»©c nÄƒng lÆ°u váº­t pháº©m chÆ°a Ä‘Æ°á»£c káº¿t ná»‘i");
+        // Chưa có cấu trúc favorites trong Firestore; không hiển thị thành công giả.
+        toast("Chức năng lưu vật phẩm chưa được kết nối");
     }
 
     private void reportProduct() {
-        toast("Chá»©c nÄƒng bÃ¡o cÃ¡o chÆ°a Ä‘Æ°á»£c káº¿t ná»‘i");
+        toast("Chức năng báo cáo chưa được kết nối");
     }
 
     private void showMoreMenu() {
         new AlertDialog.Builder(this)
-                .setItems(new String[]{"BÃ¡o cÃ¡o váº­t pháº©m"}, (dialog, which) -> reportProduct())
+                .setItems(new String[]{"Báo cáo vật phẩm"}, (dialog, which) -> reportProduct())
                 .show();
     }
 
@@ -301,10 +288,10 @@ public class SharenestProductDetailActivity extends AppCompatActivity {
 
     private static String conditionLabel(String value) {
         switch (value) {
-            case "NEW": return "Má»›i";
-            case "GOOD": return "CÃ²n tá»‘t";
-            case "USED": return "ÄÃ£ qua sá»­ dá»¥ng";
-            default: return orDefault(value, "ChÆ°a rÃµ");
+            case "NEW": return "Mới";
+            case "GOOD": return "Còn tốt";
+            case "USED": return "Đã qua sử dụng";
+            default: return orDefault(value, "Chưa rõ");
         }
     }
 

@@ -28,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
@@ -62,7 +63,7 @@ public class AddProductActivity extends AppCompatActivity {
     private static final int MAX_IMAGES = 5;
     private static final int MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
-    // Pháº£i trÃ¹ng vá»›i collection mÃ  HomeActivity Ä‘ang Ä‘á»c.
+    // Phải trùng với collection mà HomeActivity đang đọc.
     private static final String PRODUCT_COLLECTION = "products";
 
     private EditText edtProductName;
@@ -106,7 +107,7 @@ public class AddProductActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<Void> cameraLauncher;
 
-    // Má»™t áº£nh cÃ³ thá»ƒ Ä‘áº¿n tá»« thÆ° viá»‡n hoáº·c tá»« camera.
+    // Một ảnh có thể đến từ thư viện hoặc từ camera.
     private static class SelectedImage {
         Uri uri;
         Bitmap bitmap;
@@ -133,6 +134,7 @@ public class AddProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_add_product);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_ADD);
 
         firestore = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -148,7 +150,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 1. ÃNH Xáº  GIAO DIá»†N
+    // 1. ÁNH XẠ GIAO DIỆN
     // =========================
 
     private void initViews() {
@@ -181,12 +183,12 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 2. ÄÄ‚NG KÃ ACTIVITY RESULT
+    // 2. ĐĂNG KÝ ACTIVITY RESULT
     // =========================
 
     private void registerLaunchers() {
 
-        // Xin quyá»n GPS.
+        // Xin quyền GPS.
         locationPermissionLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.RequestPermission(),
@@ -194,12 +196,12 @@ public class AddProductActivity extends AppCompatActivity {
                             if (granted) {
                                 getCurrentLocation();
                             } else {
-                                showToast("Báº¡n chÆ°a cáº¥p quyá»n vá»‹ trÃ­");
+                                showToast("Bạn chưa cấp quyền vị trí");
                             }
                         }
                 );
 
-        // Nháº­n káº¿t quáº£ tá»« SelectLocationActivity.
+        // Nhận kết quả từ SelectLocationActivity.
         locationPickerLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.StartActivityForResult(),
@@ -223,7 +225,7 @@ public class AddProductActivity extends AppCompatActivity {
                             );
 
                             if (!isValidCoordinates(latitude, longitude)) {
-                                showToast("Tá»a Ä‘á»™ khÃ´ng há»£p lá»‡");
+                                showToast("Tọa độ không hợp lệ");
                                 return;
                             }
 
@@ -247,7 +249,7 @@ public class AddProductActivity extends AppCompatActivity {
                         }
                 );
 
-        // Chá»n nhiá»u áº£nh tá»« thÆ° viá»‡n.
+        // Chọn nhiều ảnh từ thư viện.
         galleryLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.GetMultipleContents(),
@@ -274,15 +276,15 @@ public class AddProductActivity extends AppCompatActivity {
                             }
 
                             if (added == 0) {
-                                showToast("KhÃ´ng thÃªm Ä‘Æ°á»£c áº£nh há»£p lá»‡");
+                                showToast("Không thêm được ảnh hợp lệ");
                             }
 
                             updateImagePreview();
                         }
                 );
 
-        // Chá»¥p áº£nh báº±ng á»©ng dá»¥ng camera.
-        // TakePicturePreview tráº£ vá» áº£nh xem trÆ°á»›c.
+        // Chụp ảnh bằng ứng dụng camera.
+        // TakePicturePreview trả về ảnh xem trước.
         cameraLauncher =
                 registerForActivityResult(
                         new ActivityResultContracts.TakePicturePreview(),
@@ -293,7 +295,7 @@ public class AddProductActivity extends AppCompatActivity {
                             }
 
                             if (selectedImages.size() >= MAX_IMAGES) {
-                                showToast("Chá»‰ Ä‘Æ°á»£c chá»n tá»‘i Ä‘a 5 áº£nh");
+                                showToast("Chỉ được chọn tối đa 5 ảnh");
                                 return;
                             }
 
@@ -307,27 +309,27 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 3. DANH Má»¤C VÃ€ TÃŒNH TRáº NG
+    // 3. DANH MỤC VÀ TÌNH TRẠNG
     // =========================
 
     private void setupSpinners() {
 
         String[] categories = {
-                "Chá»n danh má»¥c",
-                "Quáº§n Ã¡o",
-                "SÃ¡ch",
-                "Thá»±c pháº©m",
-                "Äá»“ gia dá»¥ng",
-                "Ná»™i tháº¥t",
-                "Äá»“ Ä‘iá»‡n tá»­",
-                "KhÃ¡c"
+                "Chọn danh mục",
+                "Quần áo",
+                "Sách",
+                "Thực phẩm",
+                "Đồ gia dụng",
+                "Nội thất",
+                "Đồ điện tử",
+                "Khác"
         };
 
         String[] conditions = {
-                "Chá»n tÃ¬nh tráº¡ng",
-                "Má»›i",
-                "CÃ²n tá»‘t",
-                "ÄÃ£ qua sá»­ dá»¥ng"
+                "Chọn tình trạng",
+                "Mới",
+                "Còn tốt",
+                "Đã qua sử dụng"
         };
 
         ArrayAdapter<String> categoryAdapter =
@@ -358,7 +360,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 4. Xá»¬ LÃ Sá»° KIá»†N
+    // 4. XỬ LÝ SỰ KIỆN
     // =========================
 
     private void setupListeners() {
@@ -384,6 +386,7 @@ public class AddProductActivity extends AppCompatActivity {
                     AddProductActivity.this,
                     SelectLocationActivity.class
             );
+            intent.putExtra("openTab", BottomNavHelper.TAB_ADD);
 
             locationPickerLauncher.launch(intent);
         });
@@ -394,13 +397,13 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 5. CHá»ŒN áº¢NH
+    // 5. CHỌN ẢNH
     // =========================
 
     private void openGallery() {
 
         if (selectedImages.size() >= MAX_IMAGES) {
-            showToast("Báº¡n Ä‘Ã£ chá»n Ä‘á»§ 5 áº£nh");
+            showToast("Bạn đã chọn đủ 5 ảnh");
             return;
         }
 
@@ -410,7 +413,7 @@ public class AddProductActivity extends AppCompatActivity {
     private void openCamera() {
 
         if (selectedImages.size() >= MAX_IMAGES) {
-            showToast("Báº¡n Ä‘Ã£ chá»n Ä‘á»§ 5 áº£nh");
+            showToast("Bạn đã chọn đủ 5 ảnh");
             return;
         }
 
@@ -451,19 +454,19 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 6. HIá»‚N THá»Š áº¢NH ÄÃƒ CHá»ŒN
+    // 6. HIỂN THỊ ẢNH ĐÃ CHỌN
     // =========================
 
 
     private void updateImagePreview() {
 
         txtImageCount.setText(
-                selectedImages.size() + "/" + MAX_IMAGES + " áº£nh"
+                selectedImages.size() + "/" + MAX_IMAGES + " ảnh"
         );
 
         layoutImagePreview.removeAllViews();
 
-        // ChÆ°a chá»n áº£nh: hiá»ƒn thá»‹ icon vÃ  chá»¯ á»Ÿ giá»¯a
+        // Chưa chọn ảnh: hiển thị icon và chữ ở giữa
         if (selectedImages.isEmpty()) {
 
             layoutImagePreview.setOrientation(LinearLayout.VERTICAL);
@@ -482,7 +485,7 @@ public class AddProductActivity extends AppCompatActivity {
             icon.setLayoutParams(iconParams);
 
             TextView label = new TextView(this);
-            label.setText("ThÃªm áº£nh");
+            label.setText("Thêm ảnh");
             label.setTextColor(0xFF247B53);
             label.setTextSize(13);
             label.setGravity(android.view.Gravity.CENTER);
@@ -502,7 +505,7 @@ public class AddProductActivity extends AppCompatActivity {
             return;
         }
 
-        // ÄÃ£ chá»n áº£nh: hiá»ƒn thá»‹ danh sÃ¡ch áº£nh
+        // Đã chọn ảnh: hiển thị danh sách ảnh
         layoutImagePreview.setOrientation(LinearLayout.HORIZONTAL);
         layoutImagePreview.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
@@ -547,7 +550,7 @@ public class AddProductActivity extends AppCompatActivity {
                     android.R.drawable.ic_menu_close_clear_cancel
             );
 
-            removeButton.setContentDescription("XÃ³a áº£nh");
+            removeButton.setContentDescription("Xóa ảnh");
 
             LinearLayout.LayoutParams removeParams =
                     new LinearLayout.LayoutParams(
@@ -572,7 +575,7 @@ public class AddProductActivity extends AppCompatActivity {
 
 
     // =========================
-    // 7. Láº¤Y GPS
+    // 7. LẤY GPS
     // =========================
 
     private void requestCurrentLocation() {
@@ -602,7 +605,7 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         txtProductAddress.setText(
-                "Äang láº¥y vá»‹ trÃ­ hiá»‡n táº¡i..."
+                "Đang lấy vị trí hiện tại..."
         );
 
         locationClient.getCurrentLocation(
@@ -612,7 +615,7 @@ public class AddProductActivity extends AppCompatActivity {
 
             if (location == null) {
                 txtProductAddress.setText(
-                        "KhÃ´ng láº¥y Ä‘Æ°á»£c vá»‹ trÃ­. HÃ£y thá»­ láº¡i."
+                        "Không lấy được vị trí. Hãy thử lại."
                 );
                 return;
             }
@@ -633,12 +636,12 @@ public class AddProductActivity extends AppCompatActivity {
             );
 
         }).addOnFailureListener(e -> {
-            showToast("Lá»—i GPS: " + e.getMessage());
+            showToast("Lỗi GPS: " + e.getMessage());
         });
     }
 
     // =========================
-    // 8. Äá»”I Tá»ŒA Äá»˜ THÃ€NH Äá»ŠA CHá»ˆ
+    // 8. ĐỔI TỌA ĐỘ THÀNH ĐỊA CHỈ
     // =========================
 
     private void reverseGeocode(
@@ -678,15 +681,15 @@ public class AddProductActivity extends AppCompatActivity {
                 }
 
             } catch (Exception ignored) {
-                // Náº¿u Geocoder lá»—i, váº«n dÃ¹ng tá»a Ä‘á»™.
+                // Nếu Geocoder lỗi, vẫn dùng tọa độ.
             }
 
             String finalAddress = address;
 
             runOnUiThread(() -> {
 
-                // TrÃ¡nh ghi Ä‘Ã¨ khi ngÆ°á»i dÃ¹ng Ä‘Ã£ chá»n
-                // má»™t vá»‹ trÃ­ khÃ¡c trong lÃºc Geocoder cháº¡y.
+                // Tránh ghi đè khi người dùng đã chọn
+                // một vị trí khác trong lúc Geocoder chạy.
                 if (Math.abs(selectedLatitude - latitude) > 0.000001
                         || Math.abs(selectedLongitude - longitude) > 0.000001) {
                     return;
@@ -699,7 +702,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 9. KIá»‚M TRA FORM
+    // 9. KIỂM TRA FORM
     // =========================
 
     private boolean validateForm() {
@@ -714,18 +717,18 @@ public class AddProductActivity extends AppCompatActivity {
                 edtDescription.getText().toString().trim();
 
         if (name.isEmpty()) {
-            edtProductName.setError("Nháº­p tÃªn váº­t pháº©m");
+            edtProductName.setError("Nhập tên vật phẩm");
             edtProductName.requestFocus();
             return false;
         }
 
         if (spCategory.getSelectedItemPosition() == 0) {
-            showToast("HÃ£y chá»n danh má»¥c");
+            showToast("Hãy chọn danh mục");
             return false;
         }
 
         if (quantityText.isEmpty()) {
-            edtQuantity.setError("Nháº­p sá»‘ lÆ°á»£ng");
+            edtQuantity.setError("Nhập số lượng");
             return false;
         }
 
@@ -734,28 +737,28 @@ public class AddProductActivity extends AppCompatActivity {
 
             if (quantity <= 0) {
                 edtQuantity.setError(
-                        "Sá»‘ lÆ°á»£ng pháº£i lá»›n hÆ¡n 0"
+                        "Số lượng phải lớn hơn 0"
                 );
                 return false;
             }
 
         } catch (NumberFormatException e) {
-            edtQuantity.setError("Sá»‘ lÆ°á»£ng khÃ´ng há»£p lá»‡");
+            edtQuantity.setError("Số lượng không hợp lệ");
             return false;
         }
 
         if (spCondition.getSelectedItemPosition() == 0) {
-            showToast("HÃ£y chá»n tÃ¬nh tráº¡ng");
+            showToast("Hãy chọn tình trạng");
             return false;
         }
 
         if (description.isEmpty()) {
-            edtDescription.setError("Nháº­p mÃ´ táº£");
+            edtDescription.setError("Nhập mô tả");
             return false;
         }
 
         if (selectedImages.isEmpty()) {
-            showToast("HÃ£y thÃªm Ã­t nháº¥t 1 áº£nh");
+            showToast("Hãy thêm ít nhất 1 ảnh");
             return false;
         }
 
@@ -763,12 +766,12 @@ public class AddProductActivity extends AppCompatActivity {
                 selectedLatitude,
                 selectedLongitude
         )) {
-            showToast("HÃ£y chá»n vá»‹ trÃ­ váº­t pháº©m");
+            showToast("Hãy chọn vị trí vật phẩm");
             return false;
         }
 
 //        if (auth.getCurrentUser() == null) {
-//            showToast("Báº¡n cáº§n Ä‘Äƒng nháº­p trÆ°á»›c khi Ä‘Äƒng bÃ i");
+//            showToast("Bạn cần đăng nhập trước khi đăng bài");
 //            return false;
 //        }
 
@@ -776,7 +779,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     // =========================
-    // 10. ÄÄ‚NG BÃ€I
+    // 10. ĐĂNG BÀI
     // =========================
 
     private void publishProduct() {
@@ -788,7 +791,7 @@ public class AddProductActivity extends AppCompatActivity {
         isPublishing = true;
 
         btnPublishProduct.setEnabled(false);
-        btnPublishProduct.setText("Äang chuáº©n bá»‹ Ä‘Äƒng bÃ i...");
+        btnPublishProduct.setText("Đang chuẩn bị đăng bài...");
 
         FirebaseUser user = auth.getCurrentUser();
 
@@ -797,14 +800,14 @@ public class AddProductActivity extends AppCompatActivity {
             return;
         }
 
-        // ChÆ°a Ä‘Äƒng nháº­p thÃ¬ tá»± Ä‘Äƒng nháº­p áº©n danh.
+        // Chưa đăng nhập thì tự đăng nhập ẩn danh.
         auth.signInAnonymously()
                 .addOnSuccessListener(result -> {
 
                     FirebaseUser anonymousUser = result.getUser();
 
                     if (anonymousUser == null) {
-                        uploadFailed("KhÃ´ng táº¡o Ä‘Æ°á»£c tÃ i khoáº£n áº©n danh");
+                        uploadFailed("Không tạo được tài khoản ẩn danh");
                         return;
                     }
 
@@ -813,14 +816,14 @@ public class AddProductActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
 
                     uploadFailed(
-                            "Lá»—i Ä‘Äƒng nháº­p áº©n danh: " + e.getMessage()
+                            "Lỗi đăng nhập ẩn danh: " + e.getMessage()
                     );
                 });
     }
 
     private void startPublishing(String ownerId) {
 
-        btnPublishProduct.setText("Äang táº£i áº£nh...");
+        btnPublishProduct.setText("Đang tải ảnh...");
 
         String productId = firestore
                 .collection(PRODUCT_COLLECTION)
@@ -829,7 +832,7 @@ public class AddProductActivity extends AppCompatActivity {
 
         ArrayList<String> imageUrls = new ArrayList<>();
 
-        // Upload táº¥t cáº£ áº£nh trÆ°á»›c khi lÆ°u Firestore
+        // Upload tất cả ảnh trước khi lưu Firestore
         uploadNextImage(
                 productId,
                 ownerId,
@@ -838,7 +841,7 @@ public class AddProductActivity extends AppCompatActivity {
         );
     }
     // =========================
-    // 11. UPLOAD Tá»ªNG áº¢NH
+    // 11. UPLOAD TỪNG ẢNH
     // =========================
 
     private void uploadNextImage(
@@ -850,7 +853,7 @@ public class AddProductActivity extends AppCompatActivity {
 
         if (index >= selectedImages.size()) {
 
-            // Táº¥t cáº£ áº£nh Ä‘Ã£ upload thÃ nh cÃ´ng
+            // Tất cả ảnh đã upload thành công
             saveProductToFirestore(
                     productId,
                     ownerId,
@@ -861,7 +864,7 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         btnPublishProduct.setText(
-                "Äang táº£i áº£nh "
+                "Đang tải ảnh "
                         + (index + 1)
                         + "/"
                         + selectedImages.size()
@@ -869,7 +872,7 @@ public class AddProductActivity extends AppCompatActivity {
 
         SelectedImage item = selectedImages.get(index);
 
-        // Upload áº£nh trong luá»“ng ná»n
+        // Upload ảnh trong luồng nền
         executor.execute(() -> {
 
             try {
@@ -882,10 +885,10 @@ public class AddProductActivity extends AppCompatActivity {
 
                     Log.d(
                             "CLOUDINARY",
-                            "Upload thÃ nh cÃ´ng: " + imageUrl
+                            "Upload thành công: " + imageUrl
                     );
 
-                    // Upload áº£nh tiáº¿p theo
+                    // Upload ảnh tiếp theo
                     uploadNextImage(
                             productId,
                             ownerId,
@@ -898,13 +901,13 @@ public class AddProductActivity extends AppCompatActivity {
 
                 Log.e(
                         "CLOUDINARY",
-                        "Upload áº£nh tháº¥t báº¡i",
+                        "Upload ảnh thất bại",
                         e
                 );
 
                 runOnUiThread(() ->
                         uploadFailed(
-                                "Lá»—i táº£i áº£nh "
+                                "Lỗi tải ảnh "
                                         + (index + 1)
                                         + ": "
                                         + e.getMessage()
@@ -928,7 +931,7 @@ public class AddProductActivity extends AppCompatActivity {
                          new ByteArrayOutputStream()) {
 
                 if (input == null) {
-                    throw new Exception("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c áº£nh");
+                    throw new Exception("Không đọc được ảnh");
                 }
 
                 byte[] buffer = new byte[8192];
@@ -939,7 +942,7 @@ public class AddProductActivity extends AppCompatActivity {
                     output.write(buffer, 0, length);
 
                     if (output.size() > MAX_IMAGE_BYTES) {
-                        throw new Exception("áº¢nh vÆ°á»£t quÃ¡ 10 MB");
+                        throw new Exception("Ảnh vượt quá 10 MB");
                     }
                 }
 
@@ -958,19 +961,19 @@ public class AddProductActivity extends AppCompatActivity {
             );
 
             if (!compressed) {
-                throw new Exception("KhÃ´ng nÃ©n Ä‘Æ°á»£c áº£nh");
+                throw new Exception("Không nén được ảnh");
             }
 
             imageBytes = output.toByteArray();
 
         } else {
-            throw new Exception("áº¢nh khÃ´ng há»£p lá»‡");
+            throw new Exception("Ảnh không hợp lệ");
         }
 
         if (imageBytes.length == 0
                 || imageBytes.length > MAX_IMAGE_BYTES) {
 
-            throw new Exception("Dung lÆ°á»£ng áº£nh khÃ´ng há»£p lá»‡");
+            throw new Exception("Dung lượng ảnh không hợp lệ");
         }
 
         String boundary =
@@ -1067,7 +1070,7 @@ public class AddProductActivity extends AppCompatActivity {
 
                 if (input == null) {
                     throw new Exception(
-                            "Cloudinary khÃ´ng tráº£ vá» dá»¯ liá»‡u"
+                            "Cloudinary không trả về dữ liệu"
                     );
                 }
 
@@ -1112,7 +1115,7 @@ public class AddProductActivity extends AppCompatActivity {
             if (!secureUrl.startsWith("https://")) {
 
                 throw new Exception(
-                        "Cloudinary khÃ´ng tráº£ vá» URL áº£nh há»£p lá»‡"
+                        "Cloudinary không trả về URL ảnh hợp lệ"
                 );
             }
 
@@ -1126,7 +1129,7 @@ public class AddProductActivity extends AppCompatActivity {
         }
     }
     // =========================
-    // 12. LÆ¯U FIRESTORE
+    // 12. LƯU FIRESTORE
     // =========================
 
     private void saveProductToFirestore(
@@ -1135,7 +1138,7 @@ public class AddProductActivity extends AppCompatActivity {
             ArrayList<String> imageUrls
     ) {
 
-        btnPublishProduct.setText("Äang Ä‘Äƒng bÃ i...");
+        btnPublishProduct.setText("Đang đăng bài...");
 
         String name =
                 edtProductName.getText().toString().trim();
@@ -1230,10 +1233,10 @@ public class AddProductActivity extends AppCompatActivity {
                     isPublishing = false;
 
                     btnPublishProduct.setEnabled(true);
-                    btnPublishProduct.setText("ÄÄƒng bÃ i");
+                    btnPublishProduct.setText("Đăng bài");
 
                     showToast(
-                            "Lá»—i lÆ°u Firestore: " + e.getMessage()
+                            "Lỗi lưu Firestore: " + e.getMessage()
                     );
                 });
     }
@@ -1243,7 +1246,7 @@ public class AddProductActivity extends AppCompatActivity {
         isPublishing = false;
 
         btnPublishProduct.setEnabled(true);
-        btnPublishProduct.setText("ÄÄƒng bÃ i");
+        btnPublishProduct.setText("Đăng bài");
 
         showToast(message);
     }
@@ -1251,22 +1254,22 @@ public class AddProductActivity extends AppCompatActivity {
         if (!validateForm()) return;
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("XÃ¡c nháº­n Ä‘Äƒng bÃ i")
+                .setTitle("Xác nhận đăng bài")
                 .setMessage(
-                        "Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n Ä‘Äƒng váº­t pháº©m nÃ y?\n\n" +
-                                "Sau khi Ä‘Äƒng, má»i ngÆ°á»i cÃ³ thá»ƒ nhÃ¬n tháº¥y " +
-                                "váº­t pháº©m vÃ  gá»­i yÃªu cáº§u nháº­n."
+                        "Bạn có chắc chắn muốn đăng vật phẩm này?\n\n" +
+                                "Sau khi đăng, mọi người có thể nhìn thấy " +
+                                "vật phẩm và gửi yêu cầu nhận."
                 )
-                .setNegativeButton("Há»§y", (dialog, which) -> {
+                .setNegativeButton("Hủy", (dialog, which) -> {
                     dialog.dismiss();
                 })
-                .setPositiveButton("ÄÄƒng bÃ i", (dialog, which) -> {
+                .setPositiveButton("Đăng bài", (dialog, which) -> {
                     publishProduct();
                 })
                 .show();
     }
     // =========================
-    // 13. HÃ€M Há»– TRá»¢
+    // 13. HÀM HỖ TRỢ
     // =========================
 
     private boolean isValidCoordinates(

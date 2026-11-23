@@ -67,16 +67,7 @@
                         android:textColor="@color/ink"/>
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/navNotifications"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:padding="7dp"
-                    android:src="@drawable/notification"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Thông báo"
-                    android:clickable="true"
-                    android:focusable="true" />
+                <include layout="@layout/view_notification_button" />
 
             </LinearLayout>
 
@@ -144,19 +135,16 @@
             </LinearLayout>
 
             <!-- CATEGORIES -->
-            <HorizontalScrollView
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/categoryRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:paddingStart="20dp"
-                android:paddingEnd="12dp">
-
-                <LinearLayout
-                    android:id="@+id/categoryRow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"/>
-            </HorizontalScrollView>
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="6dp"
+                app:singleLine="false"
+                app:singleSelection="true" />
 
             <!-- NEARBY TITLE -->
             <LinearLayout
@@ -232,209 +220,6 @@
         android:visibility="gone" />
 
 
-    <!-- BOTTOM NAVIGATION -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="#FFFFFF"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:elevation="5dp">
-
-        <!-- TRANG CHỦ -->
-        <LinearLayout
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <FrameLayout
-                android:id="@+id/navHomeBackground"
-                android:layout_width="54dp"
-                android:layout_height="40dp">
-
-                <ImageView
-                    android:id="@+id/iconHome"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/home"
-                    android:contentDescription="Trang chủ" />
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/textHome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Trang chủ"
-                android:textSize="10sp"
-                android:textColor="@color/muted"
-                android:includeFontPadding="false" />
-
-        </LinearLayout>
-
-        <!-- TÌM KIẾM -->
-        <LinearLayout
-            android:id="@+id/navSearch"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <FrameLayout
-                android:id="@+id/navSearchBackground"
-                android:layout_width="54dp"
-                android:layout_height="40dp">
-
-                <ImageView
-                    android:id="@+id/iconSearch"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/search_icon"
-                    android:contentDescription="Tìm kiếm" />
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/textSearch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Tìm kiếm"
-                android:textSize="10sp"
-                android:textColor="@color/muted"
-                android:includeFontPadding="false" />
-
-        </LinearLayout>
-
-        <!-- ĐĂNG BÀI -->
-        <LinearLayout
-            android:id="@+id/navAdd"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <FrameLayout
-                android:id="@+id/btnAddProduct"
-                android:layout_width="40dp"
-                android:layout_height="35dp"
-                android:background="@drawable/bg_nav_add">
-
-                <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/add"
-                    android:contentDescription="Đăng bài"
-                    android:scaleType="fitCenter"
-                    app:tint="#FFFFFF" />
-
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Đăng bài"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:textColor="@color/green"
-                android:includeFontPadding="false" />
-
-        </LinearLayout>
-
-        <!-- YÊU CẦU -->
-        <LinearLayout
-            android:id="@+id/navMessages"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <FrameLayout
-                android:id="@+id/navRequestsBackground"
-                android:layout_width="54dp"
-                android:layout_height="40dp">
-
-                <ImageView
-                    android:id="@+id/iconRequests"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/file"
-                    android:contentDescription="Yêu cầu" />
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/textRequests"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Yêu cầu"
-                android:textSize="10sp"
-                android:textColor="@color/muted"
-                android:includeFontPadding="false" />
-
-        </LinearLayout>
-
-        <!-- CÁ NHÂN -->
-        <LinearLayout
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true">
-
-            <FrameLayout
-                android:id="@+id/navProfileBackground"
-                android:layout_width="54dp"
-                android:layout_height="40dp">
-
-                <ImageView
-                    android:id="@+id/iconProfile"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/user"
-                    android:contentDescription="Cá nhân" />
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/textProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Cá nhân"
-                android:textSize="10sp"
-                android:textColor="@color/muted"
-                android:includeFontPadding="false" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+    <include layout="@layout/view_bottom_nav" />
 
 </LinearLayout>

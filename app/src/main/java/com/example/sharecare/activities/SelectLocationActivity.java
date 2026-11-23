@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
@@ -66,10 +67,16 @@ public class SelectLocationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Pháº£i khá»Ÿi táº¡o MapLibre trÆ°á»›c khi náº¡p XML chá»©a MapView.
+        // Phải khởi tạo MapLibre trước khi nạp XML chứa MapView.
         MapLibre.getInstance(getApplicationContext());
 
         setContentView(R.layout.activity_select_location);
+
+        String navTab = getIntent().getStringExtra("openTab");
+        if (navTab == null) {
+            navTab = BottomNavHelper.TAB_HOME;
+        }
+        BottomNavHelper.attach(this, navTab);
 
         locationClient =
                 LocationServices.getFusedLocationProviderClient(this);
@@ -92,7 +99,7 @@ public class SelectLocationActivity extends AppCompatActivity {
                     if (granted) {
                         getCurrentLocation();
                     } else {
-                        showToast("Báº¡n chÆ°a cáº¥p quyá»n vá»‹ trÃ­");
+                        showToast("Bạn chưa cấp quyền vị trí");
                     }
                 }
         );
@@ -176,7 +183,7 @@ public class SelectLocationActivity extends AppCompatActivity {
         selectedLatitude = center.getLatitude();
         selectedLongitude = center.getLongitude();
 
-        // Äá»•i ngay tá»a Ä‘á»™, sau Ä‘Ã³ má»›i tÃ¬m tÃªn Ä‘á»‹a chá»‰.
+        // Đổi ngay tọa độ, sau đó mới tìm tên địa chỉ.
         selectedAddress = String.format(
                 Locale.US,
                 "%.6f, %.6f",
@@ -236,20 +243,20 @@ public class SelectLocationActivity extends AppCompatActivity {
                         location.getLongitude()
                 );
             } else {
-                showToast("KhÃ´ng láº¥y Ä‘Æ°á»£c GPS. HÃ£y báº­t vá»‹ trÃ­.");
+                showToast("Không lấy được GPS. Hãy bật vị trí.");
             }
         }).addOnFailureListener(e ->
-                showToast("Lá»—i GPS: " + e.getMessage())
+                showToast("Lỗi GPS: " + e.getMessage())
         );
     }
 
     private void searchAddress(String keyword) {
         if (keyword.isEmpty()) {
-            showToast("HÃ£y nháº­p Ä‘á»‹a chá»‰");
+            showToast("Hãy nhập địa chỉ");
             return;
         }
 
-        txtSelectedAddress.setText("Äang tÃ¬m Ä‘á»‹a chá»‰...");
+        txtSelectedAddress.setText("Đang tìm địa chỉ...");
 
         executor.execute(() -> {
             try {
@@ -268,16 +275,16 @@ public class SelectLocationActivity extends AppCompatActivity {
                         );
                     } else {
                         txtSelectedAddress.setText(
-                                "KhÃ´ng tÃ¬m tháº¥y Ä‘á»‹a chá»‰"
+                                "Không tìm thấy địa chỉ"
                         );
                     }
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     txtSelectedAddress.setText(
-                            "KhÃ´ng tÃ¬m Ä‘Æ°á»£c Ä‘á»‹a chá»‰"
+                            "Không tìm được địa chỉ"
                     );
-                    showToast("Lá»—i tÃ¬m kiáº¿m: " + e.getMessage());
+                    showToast("Lỗi tìm kiếm: " + e.getMessage());
                 });
             }
         });
@@ -313,7 +320,7 @@ public class SelectLocationActivity extends AppCompatActivity {
                     }
                 }
             } catch (Exception ignored) {
-                // Náº¿u Geocoder lá»—i váº«n giá»¯ tá»a Ä‘á»™ Ä‘Ã£ chá»n.
+                // Nếu Geocoder lỗi vẫn giữ tọa độ đã chọn.
             }
 
             String finalAddress = addressText;

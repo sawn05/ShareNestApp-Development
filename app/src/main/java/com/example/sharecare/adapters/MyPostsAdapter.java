@@ -68,12 +68,12 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
         SharenestProduct p = items.get(position);
 
-        // TÃŠN Váº¬T PHáº¨M
+        // TÊN VẬT PHẨM
         h.name.setText(
-                p.name == null ? "Váº­t pháº©m" : p.name
+                p.name == null ? "Vật phẩm" : p.name
         );
 
-        // TRáº NG THÃI
+        // TRẠNG THÁI
         String status = p.status == null
                 ? "AVAILABLE"
                 : p.status;
@@ -82,19 +82,19 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
         switch (status) {
             case "AVAILABLE":
-                label = "â— CÃ²n kháº£ dá»¥ng";
+                label = "● Còn khả dụng";
                 break;
 
             case "RESERVED":
-                label = "â— ÄÃ£ cÃ³ ngÆ°á»i nháº­n";
+                label = "● Đã có người nhận";
                 break;
 
             case "COMPLETED":
-                label = "â— ÄÃ£ hoÃ n táº¥t";
+                label = "● Đã hoàn tất";
                 break;
 
             default:
-                label = "â— " + status;
+                label = "● " + status;
                 break;
         }
 
@@ -108,11 +108,11 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 )
         );
 
-        // NGÃ€Y ÄÄ‚NG
+        // NGÀY ĐĂNG
         if (p.createdAt != null) {
 
             SimpleDateFormat sdf = new SimpleDateFormat(
-                    "'ÄÄƒng ngÃ y' dd/MM/yyyy 'lÃºc' HH:mm",
+                    "'Đăng ngày' dd/MM/yyyy 'lúc' HH:mm",
                     new Locale("vi", "VN")
             );
 
@@ -125,23 +125,23 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
             );
 
         } else {
-            h.date.setText("Vá»«a Ä‘Äƒng");
+            h.date.setText("Vừa đăng");
         }
 
-        // GHI CHÃš
+        // GHI CHÚ
         String note;
 
         switch (status) {
             case "AVAILABLE":
-                note = "Váº­t pháº©m Ä‘ang chá» ngÆ°á»i nháº­n";
+                note = "Vật phẩm đang chờ người nhận";
                 break;
 
             case "RESERVED":
-                note = "ÄÃ£ cÃ³ ngÆ°á»i nháº­n Â· Äang chá» trao";
+                note = "Đã có người nhận · Đang chờ trao";
                 break;
 
             case "COMPLETED":
-                note = "ÄÃ£ trao táº·ng váº­t pháº©m";
+                note = "Đã trao tặng vật phẩm";
                 break;
 
             default:
@@ -151,7 +151,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
         h.note.setText(note);
 
-        // áº¢NH Váº¬T PHáº¨M
+        // ẢNH VẬT PHẨM
         Glide.with(h.itemView.getContext())
                 .load(p.coverImageUrl)
                 .placeholder(R.drawable.posts_image_placeholder)
@@ -159,7 +159,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 .centerCrop()
                 .into(h.image);
 
-        // CHá»ˆ CHO PHÃ‰P Sá»¬A/XÃ“A KHI CÃ’N KHáº¢ Dá»¤NG
+        // CHỈ CHO PHÉP SỬA/XÓA KHI CÒN KHẢ DỤNG
         boolean editable = "AVAILABLE".equals(status);
 
         h.btnEditPost.setVisibility(
@@ -170,14 +170,14 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 editable ? View.VISIBLE : View.GONE
         );
 
-        // CHá»ˆNH Sá»¬A BÃ€I ÄÄ‚NG
+        // CHỈNH SỬA BÀI ĐĂNG
         h.btnEditPost.setOnClickListener(v -> {
             if (callback != null) {
                 callback.onAction(p, "edit");
             }
         });
 
-        // XÃ“A BÃ€I ÄÄ‚NG
+        // XÓA BÀI ĐĂNG
         h.btnDeletePost.setOnClickListener(v -> {
             deleteProduct(p, v.getContext());
         });
@@ -189,7 +189,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
     }
 
     // ======================================
-    // XÃ“A BÃ€I ÄÄ‚NG TRÃŠN FIREBASE
+    // XÓA BÀI ĐĂNG TRÊN FIREBASE
     // ======================================
 
     private void deleteProduct(
@@ -202,7 +202,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
         if (uid == null) {
             Toast.makeText(
                     context,
-                    "Báº¡n cáº§n Ä‘Äƒng nháº­p Ä‘á»ƒ xÃ³a bÃ i Ä‘Äƒng",
+                    "Bạn cần đăng nhập để xóa bài đăng",
                     Toast.LENGTH_SHORT
             ).show();
             return;
@@ -211,20 +211,20 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
         if (SharenestProduct.id == null || SharenestProduct.id.trim().isEmpty()) {
             Toast.makeText(
                     context,
-                    "KhÃ´ng tÃ¬m tháº¥y ID bÃ i Ä‘Äƒng",
+                    "Không tìm thấy ID bài đăng",
                     Toast.LENGTH_SHORT
             ).show();
             return;
         }
 
         new AlertDialog.Builder(context)
-                .setTitle("XÃ³a bÃ i Ä‘Äƒng")
+                .setTitle("Xóa bài đăng")
                 .setMessage(
-                        "Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a bÃ i Ä‘Äƒng nÃ y khÃ´ng? " +
-                                "HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c."
+                        "Bạn có chắc chắn muốn xóa bài đăng này không? " +
+                                "Hành động này không thể hoàn tác."
                 )
-                .setNegativeButton("Há»§y", null)
-                .setPositiveButton("XÃ³a", (dialog, which) -> {
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Xóa", (dialog, which) -> {
 
                     FirebaseFirestore.getInstance()
                             .collection("products")
@@ -234,12 +234,12 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
                                 Toast.makeText(
                                         context,
-                                        "ÄÃ£ xÃ³a bÃ i Ä‘Äƒng trÃªn Firebase",
+                                        "Đã xóa bài đăng trên Firebase",
                                         Toast.LENGTH_SHORT
                                 ).show();
 
-                                // Cáº­p nháº­t giao diá»‡n sau khi
-                                // Firebase xÃ¡c nháº­n xÃ³a thÃ nh cÃ´ng
+                                // Cập nhật giao diện sau khi
+                                // Firebase xác nhận xóa thành công
                                 int index = items.indexOf(SharenestProduct);
 
                                 if (index != -1) {
@@ -247,8 +247,8 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                                     notifyItemRemoved(index);
                                 }
 
-                                // ThÃ´ng bÃ¡o cho Fragment náº¿u cáº§n
-                                // cáº­p nháº­t sá»‘ lÆ°á»£ng bÃ i Ä‘Äƒng
+                                // Thông báo cho Fragment nếu cần
+                                // cập nhật số lượng bài đăng
                                 if (callback != null) {
                                     callback.onAction(SharenestProduct, "deleted");
                                 }
@@ -258,7 +258,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
                                 Toast.makeText(
                                         context,
-                                        "XÃ³a tháº¥t báº¡i: " + e.getMessage(),
+                                        "Xóa thất bại: " + e.getMessage(),
                                         Toast.LENGTH_LONG
                                 ).show();
 

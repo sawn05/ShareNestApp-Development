@@ -41,19 +41,19 @@ public class SharenestProduct {
         p.coverImageUrl = text(doc, "coverImageUrl");
         p.status = text(doc, "status");
 
-        // Láº¥y thá»i gian Ä‘Äƒng bÃ i
+        // Lấy thời gian đăng bài
         Timestamp timestamp = doc.getTimestamp("createdAt");
 
         if (timestamp != null) {
             p.createdAt = timestamp.toDate();
         }
 
-        // KhÃ´ng hiá»ƒn thá»‹ sáº£n pháº©m Ä‘Ã£ xÃ³a
+        // Không hiển thị sản phẩm đã xóa
         if (Boolean.TRUE.equals(doc.getBoolean("isDeleted"))) {
             return null;
         }
 
-        // KhÃ´ng hiá»ƒn thá»‹ sáº£n pháº©m bá»‹ áº©n
+        // Không hiển thị sản phẩm bị ẩn
         String moderation = text(doc, "moderationStatus");
 
         if (!moderation.isEmpty()
@@ -61,37 +61,37 @@ public class SharenestProduct {
             return null;
         }
 
-        // Hiá»ƒn thá»‹ AVAILABLE vÃ  RESERVED
-        // KhÃ´ng hiá»ƒn thá»‹ COMPLETED
+        // Hiển thị AVAILABLE và RESERVED
+        // Không hiển thị COMPLETED
         if ("COMPLETED".equals(p.status)) {
             return null;
         }
 
-        // Äá»c tá»•ng sá»‘ lÆ°á»£ng
+        // Đọc tổng số lượng
         Number total = (Number) doc.get("quantity");
         p.quantity = total == null ? 0 : total.longValue();
 
-        // Æ¯u tiÃªn quantityAvailable náº¿u cÃ³
+        // Ưu tiên quantityAvailable nếu có
         Number available =
                 (Number) doc.get("quantityAvailable");
 
         if (available != null) {
             p.quantityAvailable = available.longValue();
         } else {
-            // TÆ°Æ¡ng thÃ­ch dá»¯ liá»‡u cÅ©
+            // Tương thích dữ liệu cũ
             p.quantityAvailable =
                     "AVAILABLE".equals(p.status)
                             ? p.quantity : 0;
         }
 
-        // Äá»c tá»a Ä‘á»™ náº¿u cÃ³
+        // Đọc tọa độ nếu có
         Number lat = (Number) doc.get("latitude");
         Number lon = (Number) doc.get("longitude");
 
         p.latitude = lat == null ? 0 : lat.doubleValue();
         p.longitude = lon == null ? 0 : lon.doubleValue();
 
-        // Láº¥y áº£nh Ä‘áº§u tiÃªn náº¿u chÆ°a cÃ³ áº£nh Ä‘áº¡i diá»‡n
+        // Lấy ảnh đầu tiên nếu chưa có ảnh đại diện
         if (p.coverImageUrl.isEmpty()) {
 
             Object images = doc.get("imageUrls");

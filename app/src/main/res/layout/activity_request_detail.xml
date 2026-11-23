@@ -32,6 +32,8 @@
             android:text="@string/request_detail_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -182,4 +184,6 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

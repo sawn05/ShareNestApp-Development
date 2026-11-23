@@ -32,6 +32,8 @@
             android:text="@string/received_requests_title"
             android:textColor="@color/text_primary"
             android:textSize="20sp" />
+
+        <include layout="@layout/view_notification_button" />
     </LinearLayout>
 
     <com.google.android.material.tabs.TabLayout
@@ -107,4 +109,6 @@
                 android:textSize="13sp" />
         </LinearLayout>
     </FrameLayout>
+
+    <include layout="@layout/view_bottom_nav" />
 </LinearLayout>

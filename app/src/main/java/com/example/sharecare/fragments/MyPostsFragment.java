@@ -53,7 +53,7 @@ public class MyPostsFragment extends Fragment {
     private String selectedStatus = "AVAILABLE";
 
     public MyPostsFragment() {
-        // Constructor rá»—ng
+        // Constructor rỗng
     }
 
     @Nullable
@@ -80,7 +80,7 @@ public class MyPostsFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
 
-        // Ãnh xáº¡ giao diá»‡n
+        // Ánh xạ giao diện
         tabAvailable = view.findViewById(R.id.tabAvailable);
         tabReserved = view.findViewById(R.id.tabReserved);
         tabCompleted = view.findViewById(R.id.tabCompleted);
@@ -100,7 +100,7 @@ public class MyPostsFragment extends Fragment {
                 new LinearLayoutManager(requireContext())
         );
 
-        // Giá»¯ nguyÃªn chá»©c nÄƒng Adapter cÅ©
+        // Giữ nguyên chức năng Adapter cũ
         adapter = new MyPostsAdapter((SharenestProduct, action) -> {
 
             if ("delete".equals(action)) {
@@ -122,7 +122,7 @@ public class MyPostsFragment extends Fragment {
 
         recycler.setAdapter(adapter);
 
-        // Chuyá»ƒn tráº¡ng thÃ¡i bÃ i Ä‘Äƒng
+        // Chuyển trạng thái bài đăng
         tabAvailable.setOnClickListener(v -> {
             selectStatus("AVAILABLE");
         });
@@ -135,7 +135,7 @@ public class MyPostsFragment extends Fragment {
             selectStatus("COMPLETED");
         });
 
-        // NÃºt quay láº¡i trang chá»§
+        // Nút quay lại trang chủ
         View btnBack = view.findViewById(R.id.btnBack);
 
         if (btnBack != null) {
@@ -206,13 +206,13 @@ public class MyPostsFragment extends Fragment {
         if (user == null) {
 
             txtSummary.setText(
-                    "Báº¡n cáº§n Ä‘Äƒng nháº­p Ä‘á»ƒ xem bÃ i Ä‘Äƒng"
+                    "Bạn cần đăng nhập để xem bài đăng"
             );
 
             txtEmpty.setVisibility(View.VISIBLE);
 
             txtEmpty.setText(
-                    "ChÆ°a cÃ³ tÃ i khoáº£n Ä‘Äƒng nháº­p"
+                    "Chưa có tài khoản đăng nhập"
             );
 
             return;
@@ -220,12 +220,12 @@ public class MyPostsFragment extends Fragment {
 
         String uid = user.getUid();
 
-        // Láº¥y bÃ i Ä‘Äƒng cá»§a tÃ i khoáº£n hiá»‡n táº¡i
+        // Lấy bài đăng của tài khoản hiện tại
         registration = db.collection("products")
                 .whereEqualTo("ownerId", uid)
                 .addSnapshotListener((snapshot, error) -> {
 
-                    // TrÃ¡nh cáº­p nháº­t UI khi Fragment Ä‘Ã£ bá»‹ há»§y
+                    // Tránh cập nhật UI khi Fragment đã bị hủy
                     if (getView() == null || !isAdded()) {
                         return;
                     }
@@ -233,13 +233,13 @@ public class MyPostsFragment extends Fragment {
                     if (error != null) {
 
                         txtSummary.setText(
-                                "KhÃ´ng táº£i Ä‘Æ°á»£c bÃ i Ä‘Äƒng"
+                                "Không tải được bài đăng"
                         );
 
                         txtEmpty.setVisibility(View.VISIBLE);
 
                         txtEmpty.setText(
-                                "Lá»—i Firestore: " + error.getMessage()
+                                "Lỗi Firestore: " + error.getMessage()
                         );
 
                         return;
@@ -252,21 +252,21 @@ public class MyPostsFragment extends Fragment {
                         for (DocumentSnapshot doc
                                 : snapshot.getDocuments()) {
 
-                            // Bá» bÃ i Ä‘Ã£ xÃ³a
+                            // Bỏ bài đã xóa
                             if (Boolean.TRUE.equals(
                                     doc.getBoolean("isDeleted")
                             )) {
                                 continue;
                             }
 
-                            // Äá»c cáº£ bÃ i COMPLETED
+                            // Đọc cả bài COMPLETED
                             SharenestProduct SharenestProduct = readMyPost(doc);
 
                             allPosts.add(SharenestProduct);
                         }
                     }
 
-                    // BÃ i má»›i nháº¥t lÃªn trÆ°á»›c
+                    // Bài mới nhất lên trước
                     allPosts.sort((a, b) -> {
 
                         long timeA = a.createdAt == null
@@ -298,8 +298,8 @@ public class MyPostsFragment extends Fragment {
                 "coverImageUrl"
         );
 
-        // Náº¿u chÆ°a cÃ³ coverImageUrl,
-        // láº¥y áº£nh Ä‘áº§u tiÃªn trong imageUrls
+        // Nếu chưa có coverImageUrl,
+        // lấy ảnh đầu tiên trong imageUrls
         if (SharenestProduct.coverImageUrl == null
                 || SharenestProduct.coverImageUrl.trim().isEmpty()) {
 
@@ -346,12 +346,12 @@ public class MyPostsFragment extends Fragment {
             }
         }
 
-        // Cáº­p nháº­t RecyclerView
+        // Cập nhật RecyclerView
         adapter.submit(shown);
 
         txtSummary.setText(
                 shown.size()
-                        + " bÃ i Ä‘Äƒng Â· Cáº£m Æ¡n báº¡n Ä‘Ã£ sáº» chia"
+                        + " bài đăng · Cảm ơn bạn đã sẻ chia"
         );
 
         txtEmpty.setVisibility(
@@ -363,7 +363,7 @@ public class MyPostsFragment extends Fragment {
         if (shown.isEmpty()) {
 
             txtEmpty.setText(
-                    "ChÆ°a cÃ³ bÃ i Ä‘Äƒng trong má»¥c nÃ y"
+                    "Chưa có bài đăng trong mục này"
             );
         }
     }
@@ -374,7 +374,7 @@ public class MyPostsFragment extends Fragment {
 
             Toast.makeText(
                     requireContext(),
-                    "Chá»‰ xÃ³a bÃ i cÃ²n kháº£ dá»¥ng",
+                    "Chỉ xóa bài còn khả dụng",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -382,13 +382,13 @@ public class MyPostsFragment extends Fragment {
         }
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("XÃ³a bÃ i Ä‘Äƒng?")
+                .setTitle("Xóa bài đăng?")
                 .setMessage(
-                        "BÃ i sáº½ Ä‘Æ°á»£c áº©n khá»i danh sÃ¡ch, "
-                                + "khÃ´ng xÃ³a áº£nh trÃªn Cloudinary."
+                        "Bài sẽ được ẩn khỏi danh sách, "
+                                + "không xóa ảnh trên Cloudinary."
                 )
-                .setNegativeButton("Há»§y", null)
-                .setPositiveButton("XÃ³a", (dialog, which) -> {
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Xóa", (dialog, which) -> {
 
                     FirebaseUser user = FirebaseAuth
                             .getInstance()
@@ -407,7 +407,7 @@ public class MyPostsFragment extends Fragment {
 
                                     Toast.makeText(
                                             requireContext(),
-                                            "KhÃ´ng xÃ³a Ä‘Æ°á»£c: "
+                                            "Không xóa được: "
                                                     + e.getMessage(),
                                             Toast.LENGTH_LONG
                                     ).show();

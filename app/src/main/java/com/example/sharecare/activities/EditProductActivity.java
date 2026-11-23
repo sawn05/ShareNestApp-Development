@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.CancellationTokenSource;
@@ -86,9 +87,10 @@ public class EditProductActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_edit_product);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_POSTS);
         productId = getIntent().getStringExtra("productId");
         if (productId == null || productId.trim().isEmpty()) {
-            Toast.makeText(this, "Thiáº¿u productId", Toast.LENGTH_LONG).show(); finish(); return;
+            Toast.makeText(this, "Thiếu productId", Toast.LENGTH_LONG).show(); finish(); return;
         }
         db = FirebaseFirestore.getInstance();
         edtProductName = findViewById(R.id.edtProductName);
@@ -106,9 +108,9 @@ public class EditProductActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnPublishProduct = findViewById(R.id.btnPublishProduct);
         spCategory.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Chá»n danh má»¥c", "Quáº§n Ã¡o", "SÃ¡ch", "Thá»±c pháº©m", "Äá»“ gia dá»¥ng", "Ná»™i tháº¥t", "Äá»“ Ä‘iá»‡n tá»­", "KhÃ¡c"}));
+                new String[]{"Chọn danh mục", "Quần áo", "Sách", "Thực phẩm", "Đồ gia dụng", "Nội thất", "Đồ điện tử", "Khác"}));
         spCondition.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Chá»n tÃ¬nh tráº¡ng", "Má»›i", "CÃ²n tá»‘t", "ÄÃ£ qua sá»­ dá»¥ng"}));
+                new String[]{"Chọn tình trạng", "Mới", "Còn tốt", "Đã qua sử dụng"}));
         gallery = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), uris -> {
             if (uris != null) for (Uri uri : uris) {
                 if (photos.size() >= MAX_IMAGES) break;
@@ -132,15 +134,19 @@ public class EditProductActivity extends AppCompatActivity {
             txtProductAddress.setText(address);
         });
         locationPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-            if (granted) getCurrentLocation(); else toast("ChÆ°a cáº¥p quyá»n vá»‹ trÃ­");
+            if (granted) getCurrentLocation(); else toast("Chưa cấp quyền vị trí");
         });
         btnBack.setOnClickListener(v -> finish());
         layoutImagePreview.setOnClickListener(v -> gallery.launch("image/*"));
         btnChooseImages.setOnClickListener(v -> gallery.launch("image/*"));
         btnTakePhoto.setOnClickListener(v -> {
-            if (photos.size() >= MAX_IMAGES) toast("Tá»‘i Ä‘a 5 áº£nh"); else camera.launch(null);
+            if (photos.size() >= MAX_IMAGES) toast("Tối đa 5 ảnh"); else camera.launch(null);
         });
-        btnChooseLocation.setOnClickListener(v -> mapPicker.launch(new Intent(this, SelectLocationActivity.class)));
+        btnChooseLocation.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SelectLocationActivity.class);
+            intent.putExtra("openTab", BottomNavHelper.TAB_POSTS);
+            mapPicker.launch(intent);
+        });
         btnUseCurrentLocation.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) getCurrentLocation();
             else locationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -152,10 +158,10 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void loadProduct() {
         db.collection("products").document(productId).get().addOnSuccessListener(doc -> {
-            if (!doc.exists() || Boolean.TRUE.equals(doc.getBoolean("isDeleted"))) { toast("KhÃ´ng tÃ¬m tháº¥y bÃ i Ä‘Äƒng"); finish(); return; }
+            if (!doc.exists() || Boolean.TRUE.equals(doc.getBoolean("isDeleted"))) { toast("Không tìm thấy bài đăng"); finish(); return; }
             String uid = FirebaseAuth.getInstance().getUid();
             ownerId = doc.getString("ownerId");
-            if (uid == null || !uid.equals(ownerId)) { toast("Báº¡n khÃ´ng cÃ³ quyá»n chá»‰nh sá»­a bÃ i nÃ y"); finish(); return; }
+            if (uid == null || !uid.equals(ownerId)) { toast("Bạn không có quyền chỉnh sửa bài này"); finish(); return; }
             edtProductName.setText(value(doc, "name"));
             Long qty = doc.getLong("quantity");
             edtQuantity.setText(String.valueOf(qty == null ? 1 : qty));
@@ -167,7 +173,7 @@ public class EditProductActivity extends AppCompatActivity {
             Double lat = doc.getDouble("latitude"), lng = doc.getDouble("longitude");
             if (lat != null) latitude = lat;
             if (lng != null) longitude = lng;
-            txtProductAddress.setText(address.isEmpty() ? "ChÆ°a chá»n Ä‘á»‹a chá»‰" : address);
+            txtProductAddress.setText(address.isEmpty() ? "Chưa chọn địa chỉ" : address);
             photos.clear();
             Object raw = doc.get("imageUrls");
             if (raw instanceof List<?>) {
@@ -178,7 +184,7 @@ public class EditProductActivity extends AppCompatActivity {
             }
             if (photos.isEmpty() && !value(doc, "coverImageUrl").isEmpty()) photos.add(new Photo(value(doc, "coverImageUrl"), null, null));
             loaded = true; btnPublishProduct.setEnabled(true); renderPhotos();
-        }).addOnFailureListener(e -> toast("KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u: " + e.getMessage()));
+        }).addOnFailureListener(e -> toast("Không tải được dữ liệu: " + e.getMessage()));
     }
 
     private String value(DocumentSnapshot doc, String key) {
@@ -195,7 +201,7 @@ public class EditProductActivity extends AppCompatActivity {
     private String coordinates(double lat, double lng) { return String.format(Locale.US, "%.6f, %.6f", lat, lng); }
 
     private void renderPhotos() {
-        txtImageCount.setText(photos.size() + "/" + MAX_IMAGES + " áº£nh");
+        txtImageCount.setText(photos.size() + "/" + MAX_IMAGES + " ảnh");
         layoutImagePreview.removeAllViews();
         if (photos.isEmpty()) {
             layoutImagePreview.setOrientation(LinearLayout.VERTICAL);
@@ -203,7 +209,7 @@ public class EditProductActivity extends AppCompatActivity {
             ImageView icon = new ImageView(this); icon.setImageResource(R.drawable.gallery);
             LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(dp(32), dp(32)); ip.gravity = Gravity.CENTER_HORIZONTAL;
             layoutImagePreview.addView(icon, ip);
-            TextView label = new TextView(this); label.setText("ThÃªm áº£nh"); label.setTextColor(0xFF247B53); label.setTextSize(13); label.setGravity(Gravity.CENTER);
+            TextView label = new TextView(this); label.setText("Thêm ảnh"); label.setTextColor(0xFF247B53); label.setTextSize(13); label.setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2); lp.topMargin = dp(6);
             layoutImagePreview.addView(label, lp); return;
         }
@@ -217,13 +223,13 @@ public class EditProductActivity extends AppCompatActivity {
             image.setScaleType(ImageView.ScaleType.CENTER_CROP);
             column.addView(image, new LinearLayout.LayoutParams(dp(56), dp(76)));
             if (photo.remoteUrl != null) {
-                // DÃ¹ng Glide (Ä‘Ã£ cÃ³ trong dá»± Ã¡n) Ä‘á»ƒ táº£i áº£nh Ä‘ang lÆ°u trÃªn Firestore.
+                // Dùng Glide (đã có trong dự án) để tải ảnh đang lưu trên Firestore.
                 com.bumptech.glide.Glide.with(this).load(photo.remoteUrl).into(image);
             } else if (photo.uri != null) image.setImageURI(photo.uri);
             else if (photo.bitmap != null) image.setImageBitmap(photo.bitmap);
             ImageView remove = new ImageView(this);
             remove.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
-            remove.setContentDescription("XÃ³a áº£nh");
+            remove.setContentDescription("Xóa ảnh");
             LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(dp(22), dp(22)); rp.topMargin = dp(4);
             column.addView(remove, rp);
             remove.setOnClickListener(v -> { photos.remove(photo); renderPhotos(); });
@@ -232,21 +238,21 @@ public class EditProductActivity extends AppCompatActivity {
 
     private boolean validUri(Uri uri) {
         String mime = getContentResolver().getType(uri);
-        if (!"image/jpeg".equals(mime) && !"image/png".equals(mime)) { toast("Chá»‰ nháº­n JPG, PNG"); return false; }
+        if (!"image/jpeg".equals(mime) && !"image/png".equals(mime)) { toast("Chỉ nhận JPG, PNG"); return false; }
         try (InputStream in = getContentResolver().openInputStream(uri)) {
             if (in == null) return false;
             byte[] buffer = new byte[8192]; long size = 0; int n;
-            while ((n = in.read(buffer)) != -1) { size += n; if (size > MAX_BYTES) { toast("áº¢nh vÆ°á»£t 10 MB"); return false; } }
+            while ((n = in.read(buffer)) != -1) { size += n; if (size > MAX_BYTES) { toast("Ảnh vượt 10 MB"); return false; } }
             return size > 0;
-        } catch (Exception e) { toast("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c áº£nh"); return false; }
+        } catch (Exception e) { toast("Không đọc được ảnh"); return false; }
     }
 
     private void getCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return;
-        txtProductAddress.setText("Äang láº¥y vá»‹ trÃ­...");
+        txtProductAddress.setText("Đang lấy vị trí...");
         LocationServices.getFusedLocationProviderClient(this).getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationTokenSource().getToken())
                 .addOnSuccessListener(loc -> {
-                    if (loc == null) { toast("KhÃ´ng láº¥y Ä‘Æ°á»£c vá»‹ trÃ­"); return; }
+                    if (loc == null) { toast("Không lấy được vị trí"); return; }
                     latitude = loc.getLatitude(); longitude = loc.getLongitude();
                     address = coordinates(latitude, longitude); txtProductAddress.setText(address);
                     double lat = latitude, lng = longitude;
@@ -261,7 +267,7 @@ public class EditProductActivity extends AppCompatActivity {
                             }
                         } catch (Exception ignored) { }
                     });
-                }).addOnFailureListener(e -> toast("Lá»—i GPS: " + e.getMessage()));
+                }).addOnFailureListener(e -> toast("Lỗi GPS: " + e.getMessage()));
     }
 
     private void save() {
@@ -269,25 +275,25 @@ public class EditProductActivity extends AppCompatActivity {
         String name = edtProductName.getText().toString().trim();
         String description = edtDescription.getText().toString().trim();
         String qtyText = edtQuantity.getText().toString().trim();
-        if (name.isEmpty()) { edtProductName.setError("Nháº­p tÃªn váº­t pháº©m"); return; }
-        if (spCategory.getSelectedItemPosition() == 0) { toast("Chá»n danh má»¥c"); return; }
-        if (spCondition.getSelectedItemPosition() == 0) { toast("Chá»n tÃ¬nh tráº¡ng"); return; }
-        if (description.isEmpty()) { edtDescription.setError("Nháº­p mÃ´ táº£"); return; }
+        if (name.isEmpty()) { edtProductName.setError("Nhập tên vật phẩm"); return; }
+        if (spCategory.getSelectedItemPosition() == 0) { toast("Chọn danh mục"); return; }
+        if (spCondition.getSelectedItemPosition() == 0) { toast("Chọn tình trạng"); return; }
+        if (description.isEmpty()) { edtDescription.setError("Nhập mô tả"); return; }
         int quantity;
         try { quantity = Integer.parseInt(qtyText); if (quantity <= 0) throw new NumberFormatException(); }
-        catch (NumberFormatException e) { edtQuantity.setError("Sá»‘ lÆ°á»£ng pháº£i lá»›n hÆ¡n 0"); return; }
-        if (photos.isEmpty()) { toast("Cáº§n Ã­t nháº¥t 1 áº£nh"); return; }
-        if (!validCoordinates(latitude, longitude)) { toast("Chá»n vá»‹ trÃ­"); return; }
+        catch (NumberFormatException e) { edtQuantity.setError("Số lượng phải lớn hơn 0"); return; }
+        if (photos.isEmpty()) { toast("Cần ít nhất 1 ảnh"); return; }
+        if (!validCoordinates(latitude, longitude)) { toast("Chọn vị trí"); return; }
         String category = spCategory.getSelectedItem().toString();
         String condition = spCondition.getSelectedItemPosition() == 1 ? "NEW" : spCondition.getSelectedItemPosition() == 2 ? "GOOD" : "USED";
-        saving = true; btnPublishProduct.setEnabled(false); btnPublishProduct.setText("Äang táº£i áº£nh...");
+        saving = true; btnPublishProduct.setEnabled(false); btnPublishProduct.setText("Đang tải ảnh...");
         ArrayList<Photo> snapshot = new ArrayList<>(photos);
         executor.execute(() -> {
             try {
                 ArrayList<String> urls = new ArrayList<>();
                 for (Photo p : snapshot) urls.add(p.remoteUrl != null ? p.remoteUrl : upload(p));
                 runOnUiThread(() -> commitUpdate(name, category, condition, description, quantity, urls));
-            } catch (Exception e) { runOnUiThread(() -> failed("Lá»—i táº£i áº£nh: " + e.getMessage())); }
+            } catch (Exception e) { runOnUiThread(() -> failed("Lỗi tải ảnh: " + e.getMessage())); }
         });
     }
 
@@ -297,17 +303,17 @@ public class EditProductActivity extends AppCompatActivity {
         if (photo.uri != null) {
             if ("image/png".equals(getContentResolver().getType(photo.uri))) mime = "image/png";
             try (InputStream in = getContentResolver().openInputStream(photo.uri); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                if (in == null) throw new Exception("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c áº£nh");
+                if (in == null) throw new Exception("Không đọc được ảnh");
                 byte[] buffer = new byte[8192]; int n;
-                while ((n = in.read(buffer)) != -1) { out.write(buffer, 0, n); if (out.size() > MAX_BYTES) throw new Exception("áº¢nh vÆ°á»£t 10 MB"); }
+                while ((n = in.read(buffer)) != -1) { out.write(buffer, 0, n); if (out.size() > MAX_BYTES) throw new Exception("Ảnh vượt 10 MB"); }
                 bytes = out.toByteArray();
             }
         } else {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            if (photo.bitmap == null || !photo.bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)) throw new Exception("KhÃ´ng nÃ©n Ä‘Æ°á»£c áº£nh");
+            if (photo.bitmap == null || !photo.bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)) throw new Exception("Không nén được ảnh");
             bytes = out.toByteArray();
         }
-        if (bytes.length == 0 || bytes.length > MAX_BYTES) throw new Exception("Dung lÆ°á»£ng áº£nh khÃ´ng há»£p lá»‡");
+        if (bytes.length == 0 || bytes.length > MAX_BYTES) throw new Exception("Dung lượng ảnh không hợp lệ");
         String boundary = "ShareNest" + UUID.randomUUID();
         HttpURLConnection connection = (HttpURLConnection)new URL(UPLOAD_URL).openConnection();
         try {
@@ -321,12 +327,12 @@ public class EditProductActivity extends AppCompatActivity {
             }
             int code = connection.getResponseCode();
             try (InputStream in = code >= 200 && code < 300 ? connection.getInputStream() : connection.getErrorStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                if (in == null) throw new Exception("KhÃ´ng cÃ³ pháº£n há»“i Cloudinary");
+                if (in == null) throw new Exception("Không có phản hồi Cloudinary");
                 byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
                 JSONObject response = new JSONObject(out.toString("UTF-8"));
                 if (code < 200 || code >= 300) throw new Exception(response.optJSONObject("error") == null ? "HTTP " + code : response.optJSONObject("error").optString("message"));
                 String url = response.optString("secure_url");
-                if (!url.startsWith("https://")) throw new Exception("URL Cloudinary khÃ´ng há»£p lá»‡");
+                if (!url.startsWith("https://")) throw new Exception("URL Cloudinary không hợp lệ");
                 return url;
             }
         } finally { connection.disconnect(); }
@@ -334,20 +340,20 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void commitUpdate(String name, String category, String condition, String description, int quantity, ArrayList<String> urls) {
         String uid = FirebaseAuth.getInstance().getUid();
-        if (uid == null || !uid.equals(ownerId)) { failed("PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ thay Ä‘á»•i"); return; }
+        if (uid == null || !uid.equals(ownerId)) { failed("Phiên đăng nhập đã thay đổi"); return; }
         final String finalAddress = address;
         final double finalLat = latitude, finalLng = longitude;
         db.runTransaction(transaction -> {
             com.google.firebase.firestore.DocumentReference ref = db.collection("products").document(productId);
             DocumentSnapshot doc = transaction.get(ref);
             if (!doc.exists() || Boolean.TRUE.equals(doc.getBoolean("isDeleted")))
-                throw new FirebaseFirestoreException("BÃ i Ä‘Äƒng khÃ´ng cÃ²n tá»“n táº¡i", FirebaseFirestoreException.Code.ABORTED);
+                throw new FirebaseFirestoreException("Bài đăng không còn tồn tại", FirebaseFirestoreException.Code.ABORTED);
             if (!uid.equals(doc.getString("ownerId")))
-                throw new FirebaseFirestoreException("KhÃ´ng cÃ³ quyá»n chá»‰nh sá»­a", FirebaseFirestoreException.Code.PERMISSION_DENIED);
+                throw new FirebaseFirestoreException("Không có quyền chỉnh sửa", FirebaseFirestoreException.Code.PERMISSION_DENIED);
             long reserved = doc.getLong("quantityReserved") == null ? 0 : doc.getLong("quantityReserved");
             long completed = doc.getLong("quantityCompleted") == null ? 0 : doc.getLong("quantityCompleted");
             if (quantity < reserved + completed)
-                throw new FirebaseFirestoreException("Sá»‘ lÆ°á»£ng má»›i pháº£i >= sá»‘ Ä‘Ã£ Ä‘áº·t + Ä‘Ã£ hoÃ n thÃ nh (" + (reserved + completed) + ")", FirebaseFirestoreException.Code.FAILED_PRECONDITION);
+                throw new FirebaseFirestoreException("Số lượng mới phải >= số đã đặt + đã hoàn thành (" + (reserved + completed) + ")", FirebaseFirestoreException.Code.FAILED_PRECONDITION);
             Map<String, Object> changes = new HashMap<>();
             changes.put("name", name); changes.put("category", category);
             changes.put("condition", condition); changes.put("description", description);
@@ -358,9 +364,9 @@ public class EditProductActivity extends AppCompatActivity {
             changes.put("updatedAt", FieldValue.serverTimestamp());
             transaction.update(ref, changes);
             return null;
-        }).addOnSuccessListener(unused -> { saving = false; toast("ÄÃ£ cáº­p nháº­t váº­t pháº©m"); setResult(Activity.RESULT_OK); finish(); })
-          .addOnFailureListener(e -> failed("KhÃ´ng lÆ°u Ä‘Æ°á»£c Firestore: " + e.getMessage()));
+        }).addOnSuccessListener(unused -> { saving = false; toast("Đã cập nhật vật phẩm"); setResult(Activity.RESULT_OK); finish(); })
+          .addOnFailureListener(e -> failed("Không lưu được Firestore: " + e.getMessage()));
     }
-    private void failed(String msg) { saving = false; btnPublishProduct.setEnabled(true); btnPublishProduct.setText("LÆ°u thay Ä‘á»•i"); toast(msg); }
+    private void failed(String msg) { saving = false; btnPublishProduct.setEnabled(true); btnPublishProduct.setText("Lưu thay đổi"); toast(msg); }
     @Override protected void onDestroy() { executor.shutdownNow(); super.onDestroy(); }
 }

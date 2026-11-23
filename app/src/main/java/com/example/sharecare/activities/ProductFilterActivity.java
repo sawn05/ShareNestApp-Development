@@ -7,6 +7,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.utils.WindowInsetsUi;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -45,6 +46,7 @@ public class ProductFilterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_filter);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_HOME);
 
         WindowInsetsUi.addTopPadding(
                 findViewById(android.R.id.content)

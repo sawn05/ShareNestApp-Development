@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.sharecare.R;
+import com.example.sharecare.utils.BottomNavHelper;
 import com.example.sharecare.utils.AuthSession;
 import com.example.sharecare.utils.DemoStore;
 import com.example.sharecare.utils.ProductImageUi;
@@ -49,6 +50,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
+        BottomNavHelper.attach(this, BottomNavHelper.TAB_HOME);
 
         WindowInsetsUi.addTopPadding(
                 findViewById(android.R.id.content)

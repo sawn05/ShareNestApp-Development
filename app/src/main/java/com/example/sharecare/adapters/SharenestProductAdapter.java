@@ -64,22 +64,22 @@ public class SharenestProductAdapter
 
         SharenestProduct SharenestProduct = productList.get(position);
 
-        // TÃªn sáº£n pháº©m láº¥y tá»« Firestore
+        // Tên sản phẩm lấy từ Firestore
         holder.productName.setText(
                 SharenestProduct.name == null ? "" : SharenestProduct.name
         );
 
-        // Tráº¡ng thÃ¡i sáº£n pháº©m
+        // Trạng thái sản phẩm
         if ("RESERVED".equals(SharenestProduct.status)) {
-            holder.productStatus.setText("â— ÄÃ£ Ä‘Æ°á»£c Ä‘áº·t");
+            holder.productStatus.setText("● Đã được đặt");
         } else if ("COMPLETED".equals(SharenestProduct.status)) {
-            holder.productStatus.setText("â— ÄÃ£ hoÃ n thÃ nh");
+            holder.productStatus.setText("● Đã hoàn thành");
         } else {
-            holder.productStatus.setText("â— CÃ²n kháº£ dá»¥ng");
+            holder.productStatus.setText("● Còn khả dụng");
         }
 
-        // Khoáº£ng cÃ¡ch GPS
-        String distanceText = "ChÆ°a cÃ³ vá»‹ trÃ­";
+        // Khoảng cách GPS
+        String distanceText = "Chưa có vị trí";
 
         if (SharenestProduct.distanceKm >= 0) {
 
@@ -99,8 +99,8 @@ public class SharenestProductAdapter
             }
         }
 
-        // Thá»i gian Ä‘Äƒng bÃ i
-        String timeText = "ChÆ°a cÃ³ thá»i gian";
+        // Thời gian đăng bài
+        String timeText = "Chưa có thời gian";
 
         if (SharenestProduct.createdAt != null) {
 
@@ -114,29 +114,29 @@ public class SharenestProductAdapter
             long days = diff / 86400000;
 
             if (minutes < 1) {
-                timeText = "Vá»«a Ä‘Äƒng";
+                timeText = "Vừa đăng";
             } else if (minutes < 60) {
-                timeText = minutes + " phÃºt trÆ°á»›c";
+                timeText = minutes + " phút trước";
             } else if (hours < 24) {
-                timeText = hours + " giá» trÆ°á»›c";
+                timeText = hours + " giờ trước";
             } else if (days < 30) {
-                timeText = days + " ngÃ y trÆ°á»›c";
+                timeText = days + " ngày trước";
             } else if (days < 365) {
-                timeText = (days / 30) + " thÃ¡ng trÆ°á»›c";
+                timeText = (days / 30) + " tháng trước";
             } else {
-                timeText = (days / 365) + " nÄƒm trÆ°á»›c";
+                timeText = (days / 365) + " năm trước";
             }
         }
 
-        // Hiá»ƒn thá»‹ khoáº£ng cÃ¡ch vÃ  thá»i gian
+        // Hiển thị khoảng cách và thời gian
         holder.productInfo.setText(
-                distanceText + " Â· " + timeText
+                distanceText + " · " + timeText
         );
 
-        // Láº¥y áº£nh Ä‘áº¡i diá»‡n sáº£n pháº©m
+        // Lấy ảnh đại diện sản phẩm
         String imageUrl = SharenestProduct.coverImageUrl;
 
-// Kiá»ƒm tra URL áº£nh
+// Kiểm tra URL ảnh
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
 
             Glide.with(holder.itemView.getContext())
@@ -155,7 +155,7 @@ public class SharenestProductAdapter
                     R.drawable.bg_image_placeholder
             );
         }
-        // Click xem chi tiáº¿t
+        // Click xem chi tiết
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(
                     v.getContext(),
