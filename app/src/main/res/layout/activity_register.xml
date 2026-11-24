@@ -29,21 +29,57 @@
         android:inputType="textEmailAddress"
         android:layout_marginBottom="12dp" />
 
-    <EditText
-        android:id="@+id/edtPassword"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mật khẩu"
-        android:inputType="textPassword"
-        android:layout_marginBottom="12dp" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
 
-    <EditText
-        android:id="@+id/edtConfirmPassword"
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword" />
+
+        <ImageButton
+            android:id="@+id/btnTogglePassword"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_visibility_off"
+            android:contentDescription="Hiện mật khẩu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Xác nhận mật khẩu"
-        android:inputType="textPassword"
-        android:layout_marginBottom="24dp" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <EditText
+            android:id="@+id/edtConfirmPassword"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Xác nhận mật khẩu"
+            android:inputType="textPassword" />
+
+        <ImageButton
+            android:id="@+id/btnToggleConfirmPassword"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_visibility_off"
+            android:contentDescription="Hiện mật khẩu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:layout_gravity="center_vertical" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvError"

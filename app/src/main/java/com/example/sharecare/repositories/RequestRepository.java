@@ -7,6 +7,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -325,6 +327,133 @@ public class RequestRepository {
         });
     }
 
+    public Task<Void> completeProduct(String productId) {
+
+        if (auth.getCurrentUser() == null) {
+            throw new IllegalStateException("Bạn chưa đăng nhập");
+        }
+
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        if (productId == null || productId.trim().isEmpty()) {
+            throw new IllegalStateException("Không tìm thấy bài đăng");
+        }
+
+        DocumentReference productRef =
+                db.collection("products").document(productId);
+
+        Query acceptedRequestQuery = db.collection("requests")
+                .whereEqualTo("productId", productId)
+                .whereEqualTo("status", "ACCEPTED")
+                .limit(1);
+
+        DocumentReference notificationRef =
+                db.collection("notifications").document();
+
+        return acceptedRequestQuery.get().continueWithTask(queryTask -> {
+
+            QuerySnapshot acceptedRequests = queryTask.getResult();
+
+            if (acceptedRequests.isEmpty()) {
+                throw new IllegalStateException(
+                        "Không tìm thấy yêu cầu đã chấp nhận"
+                );
+            }
+
+            DocumentReference requestRef = acceptedRequests
+                    .getDocuments()
+                    .get(0)
+                    .getReference();
+
+            return db.runTransaction(transaction -> {
+
+                DocumentSnapshot product = transaction.get(productRef);
+
+                if (!product.exists()) {
+                    throw new IllegalStateException(
+                            "Bài đăng không tồn tại"
+                    );
+                }
+
+                String ownerId = product.getString("ownerId");
+
+                if (!currentUserId.equals(ownerId)) {
+                    throw new IllegalStateException(
+                            "Bạn không có quyền xử lý bài đăng này"
+                    );
+                }
+
+                if (!"RESERVED".equals(product.getString("status"))) {
+                    throw new IllegalStateException(
+                            "Bài đăng không ở trạng thái đã có người nhận"
+                    );
+                }
+
+                DocumentSnapshot request = transaction.get(requestRef);
+
+                String requestOwnerId = request.getString("ownerId");
+
+                if (requestOwnerId == null) {
+                    requestOwnerId = request.getString("productOwnerId");
+                }
+
+                if (!currentUserId.equals(requestOwnerId)) {
+                    throw new IllegalStateException(
+                            "Bạn không có quyền xử lý yêu cầu này"
+                    );
+                }
+
+                if (!"ACCEPTED".equals(request.getString("status"))) {
+                    throw new IllegalStateException(
+                            "Yêu cầu đã được xử lý"
+                    );
+                }
+
+                transaction.update(requestRef,
+                        "status", "COMPLETED",
+                        "updatedAt", FieldValue.serverTimestamp()
+                );
+
+                Map<String, Object> productUpdates = completionUpdates(
+                        product.get("quantityAvailable"),
+                        product.get("quantityReserved"),
+                        product.get("quantityCompleted")
+                );
+
+                productUpdates.put(
+                        "updatedAt",
+                        FieldValue.serverTimestamp()
+                );
+
+                transaction.update(productRef, productUpdates);
+
+                String requesterId = request.getString("requesterId");
+                String productName = firstString(product, "name", "title");
+                String content = "Người đăng đã xác nhận "
+                        + displayName(productName, "nhu yếu phẩm")
+                        + " đã được nhận.";
+
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("userId", requesterId);
+                notification.put("title", "Vật phẩm đã được nhận");
+                notification.put("content", content);
+                notification.put("message", content);
+                notification.put("type", "ITEM_COMPLETED");
+                notification.put("requestId", requestRef.getId());
+                notification.put("productId", productId);
+                notification.put("isRead", false);
+                notification.put(
+                        "createdAt",
+                        FieldValue.serverTimestamp()
+                );
+
+                transaction.set(notificationRef, notification);
+
+                return null;
+            });
+        });
+    }
+
     // 3. Từ chối yêu cầu
     public Task<Void> rejectRequest(String requestId) {
 
@@ -407,5 +536,40 @@ public class RequestRepository {
 
             return null;
         });
+    }
+
+    static long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+
+        if (value instanceof String) {
+            try {
+                return (long) Double.parseDouble(
+                        ((String) value).trim().replace(",", ".")
+                );
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    static Map<String, Object> completionUpdates(
+            Object availableValue,
+            Object reservedValue,
+            Object completedValue
+    ) {
+        long available = toLong(availableValue);
+        long reserved = toLong(reservedValue);
+        long completed = toLong(completedValue);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "COMPLETED");
+        updates.put("quantityAvailable", Math.max(0, available - 1));
+        updates.put("quantityReserved", Math.max(0, reserved - 1));
+        updates.put("quantityCompleted", completed + 1);
+        return updates;
     }
 }

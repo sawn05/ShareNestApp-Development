@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sharecare.R;
 import com.example.sharecare.utils.AuthSession;
+import com.example.sharecare.utils.PasswordVisibilityHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,6 +38,17 @@ public class RegisterActivity extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtPassword);
         edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
         tvError = findViewById(R.id.tvError);
+
+        ImageButton btnTogglePassword =
+                findViewById(R.id.btnTogglePassword);
+        ImageButton btnToggleConfirmPassword =
+                findViewById(R.id.btnToggleConfirmPassword);
+
+        PasswordVisibilityHelper.attach(edtPassword, btnTogglePassword);
+        PasswordVisibilityHelper.attach(
+                edtConfirmPassword,
+                btnToggleConfirmPassword
+        );
 
         Button btnRegister = findViewById(R.id.btnRegister);
         TextView tvLogin = findViewById(R.id.tvLogin);

@@ -26,7 +26,7 @@ public final class RequestStatusUi {
             case "RESERVED":
                 return "Đã giữ chỗ";
             case "COMPLETED":
-                return "Đã hoàn tất";
+                return "Đã nhận";
             default:
                 return "Không xác định";
         }

@@ -72,6 +72,29 @@ public class SelectLocationActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_select_location);
 
+        Intent input = getIntent();
+
+        if (input.hasExtra("latitude")
+                && input.hasExtra("longitude")) {
+
+            selectedLatitude = input.getDoubleExtra(
+                    "latitude", selectedLatitude
+            );
+
+            selectedLongitude = input.getDoubleExtra(
+                    "longitude", selectedLongitude
+            );
+
+            selectedAddress = input.getStringExtra("address");
+
+            if (selectedAddress == null) {
+                selectedAddress = "";
+            }
+
+            radiusKm = input.getIntExtra("radiusKm", 5);
+            radiusKm = Math.max(1, Math.min(30, radiusKm));
+        }
+
         String navTab = getIntent().getStringExtra("openTab");
         if (navTab == null) {
             navTab = BottomNavHelper.TAB_HOME;
@@ -115,8 +138,8 @@ public class SelectLocationActivity extends AppCompatActivity {
         );
 
         seekRadius.setMax(29);
-        seekRadius.setProgress(4);
-        txtRadius.setText("5 km");
+        seekRadius.setProgress(radiusKm - 1);
+        txtRadius.setText(radiusKm + " km");
 
         seekRadius.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {

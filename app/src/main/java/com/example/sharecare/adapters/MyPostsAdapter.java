@@ -90,7 +90,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 break;
 
             case "COMPLETED":
-                label = "● Đã hoàn tất";
+                label = "● Đã nhận";
                 break;
 
             default:
@@ -141,7 +141,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 break;
 
             case "COMPLETED":
-                note = "Đã trao tặng vật phẩm";
+                note = "Người nhận đã xác nhận nhận vật phẩm";
                 break;
 
             default:
@@ -161,6 +161,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
         // CHỈ CHO PHÉP SỬA/XÓA KHI CÒN KHẢ DỤNG
         boolean editable = "AVAILABLE".equals(status);
+        boolean completable = "RESERVED".equals(status);
 
         h.btnEditPost.setVisibility(
                 editable ? View.VISIBLE : View.GONE
@@ -170,7 +171,16 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
                 editable ? View.VISIBLE : View.GONE
         );
 
-        // CHỈNH SỬA BÀI ĐĂNG
+        h.btnCompletePost.setVisibility(
+                completable ? View.VISIBLE : View.GONE
+        );
+
+        h.btnCompletePost.setOnClickListener(v -> {
+            if (callback != null) {
+                callback.onAction(p, "complete");
+            }
+        });
+
         h.btnEditPost.setOnClickListener(v -> {
             if (callback != null) {
                 callback.onAction(p, "edit");
@@ -282,6 +292,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
         View btnEditPost;
         View btnDeletePost;
+        View btnCompletePost;
 
         Holder(@NonNull View root) {
             super(root);
@@ -294,6 +305,7 @@ public class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.Holder> 
 
             btnEditPost = root.findViewById(R.id.btnEditPost);
             btnDeletePost = root.findViewById(R.id.btnDeletePost);
+            btnCompletePost = root.findViewById(R.id.btnCompletePost);
         }
     }
 }

@@ -20,6 +20,8 @@ import com.example.sharecare.R;
 import com.example.sharecare.activities.EditProductActivity;
 import com.example.sharecare.adapters.MyPostsAdapter;
 import com.example.sharecare.models.SharenestProduct;
+import com.example.sharecare.repositories.RequestRepository;
+import com.example.sharecare.utils.SystemNotificationHelper;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -106,6 +108,8 @@ public class MyPostsFragment extends Fragment {
             if ("delete".equals(action)) {
                 deleteProduct(SharenestProduct);
 
+            } else if ("complete".equals(action)) {
+                completeProduct(SharenestProduct);
 
             } else if ("edit".equals(action)) {
 
@@ -368,7 +372,65 @@ public class MyPostsFragment extends Fragment {
         }
     }
 
-    private void  deleteProduct(SharenestProduct SharenestProduct) {
+    private void completeProduct(SharenestProduct post) {
+        if (post == null || post.id == null || post.id.trim().isEmpty()) {
+            Toast.makeText(
+                    requireContext(),
+                    "Không tìm thấy bài đăng",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        if (!"RESERVED".equals(post.status)) {
+            Toast.makeText(
+                    requireContext(),
+                    "Chỉ xác nhận bài đã có người nhận",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Xác nhận đã nhận?")
+                .setMessage(
+                        "Bài đăng sẽ chuyển sang Đã hoàn tất "
+                                + "và không còn hiển thị trên trang chủ."
+                )
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Đã nhận", (dialog, which) -> {
+                    new RequestRepository()
+                            .completeProduct(post.id)
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(
+                                        requireContext(),
+                                        "Đã xác nhận nhận vật phẩm",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                SystemNotificationHelper.show(
+                                        requireActivity(),
+                                        2003,
+                                        "Đã xác nhận nhận",
+                                        "Sản phẩm đã chuyển sang Đã hoàn tất."
+                                );
+                            })
+                            .addOnFailureListener(e -> {
+                                if (isAdded()) {
+                                    Toast.makeText(
+                                            requireContext(),
+                                            "Xác nhận thất bại: "
+                                                    + e.getMessage(),
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            });
+                })
+                .show();
+    }
+
+    private void deleteProduct(SharenestProduct SharenestProduct) {
+
 
         if (!"AVAILABLE".equals(SharenestProduct.status)) {
 

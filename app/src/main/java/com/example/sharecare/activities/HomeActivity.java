@@ -79,8 +79,9 @@ public class HomeActivity extends AppCompatActivity {
             "Sách",
             "Đồ điện tử",
             "Thực phẩm",
-            "Khác",
-            "Nội thất"
+            "Nội thất",
+            "Khác"
+
     };
 
     @Override

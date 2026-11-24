@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sharecare.R;
 import com.example.sharecare.utils.AuthSession;
+import com.example.sharecare.utils.PasswordVisibilityHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -25,6 +27,10 @@ public class LoginActivity extends AppCompatActivity {
 
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
+
+        ImageButton btnTogglePassword =
+                findViewById(R.id.btnTogglePassword);
+        PasswordVisibilityHelper.attach(edtPassword, btnTogglePassword);
 
         Button btnLogin = findViewById(R.id.btnLogin);
         TextView tvRegister = findViewById(R.id.tvRegister);

@@ -79,14 +79,16 @@
             android:textSize="14sp"
             android:textColor="#212121" />
 
-        <ImageView
-            android:id="@+id/icEye"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+        <ImageButton
+            android:id="@+id/btnTogglePassword"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/ic_visibility_off"
-            android:contentDescription="Hiển thị mật khẩu"
+            android:contentDescription="Hiện mật khẩu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="12dp" />
+            android:layout_marginEnd="6dp" />
     </LinearLayout>
 
     <View
@@ -125,8 +127,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/dont_have_account"
-        android:textSize="14sp"
-        android:textColor="#616161"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#0066CC"
+        android:background="?attr/selectableItemBackground"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp" />
 
